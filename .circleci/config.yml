@@ -1,0 +1,182 @@
+version: 2
+jobs:
+  build_and_test:
+    resource_class: xlarge
+    docker:
+      - image: abakhtin/miniconda3_ubuntu:4.7.10
+    environment:
+      USER: "circleci"
+      PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: cpp
+      # For submitit
+      _TEST_CLUSTER_: local
+    steps:
+      - checkout
+      - run:
+         name: "Initialize submodules"
+         command: |
+            git submodule sync
+            git submodule update --init  # Non-recursive for now
+      - run:
+         name: "Install build tools from apt"
+         command: |
+          bash .circleci/node_setup_prereq.sh
+          apt-get update
+          # git fot checking out
+          # wget for conda install
+          # cmake build-essential autoconf libtool pkg-config to build postman and dipcc
+          # libgoogle-glog-dev for dipcc
+          apt-get install --yes git wget cmake build-essential autoconf libtool pkg-config libgoogle-glog-dev nodejs=8.10.0~dfsg-2ubuntu0.4
+      - restore_cache:
+          keys:
+            - v06-postman-{{ checksum ".git/modules/thirdparty/github/fairinternal/postman/HEAD" }}
+      - add_ssh_keys:
+          fingerprints:
+            - "05:84:7d:43:05:8c:67:31:c2:4c:9f:0c:29:0a:a2:56"
+            - "f9:fc:79:db:1b:11:3a:1e:3b:ef:04:33:d2:6d:a2:16"
+      - run:
+         name: "Create env and install deps"
+         command: |
+           . /opt/conda/etc/profile.d/conda.sh
+
+           set -x
+           conda create --yes -n diplomacy python=3.7
+           source activate diplomacy
+
+           # ci-hack: Install from conda to get cpu only version.
+           conda install pytorch==1.7.1 cpuonly -c pytorch --yes
+
+           # For boringssl in grpc.
+           conda install go --yes
+
+           # Hack: first install parlai that will pull old attrs version and then install new attrs.
+           sed -i"" '/attrs/d' requirements.txt
+           pip install -r requirements.txt --progress-bar off
+           pip install -r */requirements.txt --progress-bar off
+
+
+
+           conda install protobuf==3.19.1 sqlite --yes
+
+           if ! ls /postman/postman*.whl; then
+             echo "Need full postman install"
+             git submodule update --recursive
+             pushd thirdparty/github/fairinternal/postman/
+             make compile_slow
+             make build_wheel
+             rm -rf /postman
+             mkdir /postman
+             cp -v postman/dist/*whl /postman/
+             cp -v postman/python/postman/rpc*so /postman/
+             popd
+           fi
+           pip install /postman/postman*.whl
+           # Due to a bug postman wheel doesn't contain .so. So installing it manually.
+           cp /postman/*.so $CONDA_PREFIX/lib/python3.*/site-packages/postman
+
+           git submodule update
+           conda install -y nodejs
+           conda install --yes -c esri pybind11
+           conda install --yes protobuf=3.19.1
+           python -m pip install -e ./thirdparty/github/fairinternal/postman/nest/
+           python -m pip install -e . -v --use-deprecated=legacy-resolver
+           N_DIPCC_JOBS=8 make dipcc_debug all
+           pip install attrs==20.2.0 --force --upgrade
+
+      - save_cache:
+          key: v06-postman-{{ checksum ".git/modules/thirdparty/github/fairinternal/postman/HEAD" }}
+          paths: /postman
+      - run:
+         name: "Print all packages"
+         command: |
+           source activate diplomacy
+           pip freeze
+      - run:
+         name: "Hello world"
+         command: |
+           source activate diplomacy
+           python run.py --help
+      - run:
+          name: "Checking pyright config"
+          command: |
+            source activate diplomacy
+            python bin/check_pyright_config.py
+      - run:
+          name: "Linting with pyright"
+          command: |
+            source activate diplomacy
+            npm install -g pyright@1.1.217
+            # npm install -g pyright
+            pyright --version
+            mv pyrightconfig.CI.json pyrightconfig.json
+            pyright
+      - run:
+         name: "Run unit tests"
+         command: |
+           source activate diplomacy
+           PYTHONPATH=. make test_fast
+      - run:
+         name: "Run CC tests"
+         command: |
+           source activate diplomacy
+           PYTHONPATH=. make test_cc
+
+  check_python_format:
+    docker:
+      - image: continuumio/miniconda3:4.7.10
+    steps:
+      - checkout
+      - run:
+         name: "Check format of .py with black"
+         command: |
+           # Click version is a hack for some deps issue
+           pip install black==19.10b0 click==8.0.2
+           black --check .
+
+  check_clang_format:
+    docker:
+      - image: abakhtin/miniconda3_ubuntu:4.7.10
+    steps:
+      - checkout
+      - run:
+         name: "Check format of dipcc/protos with clang-format"
+         command: |
+           clang-format-8 -i conf/*.proto dipcc/dipcc/{cc,pybind}/*.{cc,h}
+           git diff
+           if ! git diff-index --quiet HEAD --; then
+              echo "ERROR: Got diff after running clang-format. See above"
+              exit 1
+           fi
+
+  check_configs:
+    docker:
+      - image: continuumio/miniconda3:4.7.10
+    steps:
+      - checkout
+      - run:
+         name: "Install deps"
+         command: |
+           conda install protobuf --yes
+           conda install -c conda-forge mypy-protobuf --yes
+           apt install make --yes
+           make protos
+      - run:
+         name: "Check submitted task configs are up-to-date"
+         command: |
+           for i in conf/*/*.prototxt; do
+             PYTHONPATH=. python bin/validate_prototxt.py $i --is_task_cfg
+           done
+      - run:
+         name: "Check all submitted configs are up-to-date"
+         command: |
+           for i in $(find conf -name "*.prototxt" ); do
+             PYTHONPATH=. python bin/validate_prototxt.py $i
+           done
+
+workflows:
+  version: 2
+  diplomacy:
+    jobs:
+      - build_and_test: {}
+      - check_python_format: {}
+      - check_clang_format: {}
+      - check_configs: {}

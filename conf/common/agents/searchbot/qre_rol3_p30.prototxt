@@ -1,0 +1,20 @@
+plausible_orders_cfg {
+  n_plausible_orders: 30
+  req_size: 1024
+  max_actions_units_ratio: 3.5
+}
+rollouts_cfg {
+  top_p: 0.95
+  temperature: 0.75
+  average_n_rollouts: 1
+  n_threads: 56
+  max_rollout_length: 3
+}
+
+cache_rollout_results: 0
+n_rollouts: 512
+
+qre {
+  eta: 10.0
+  target_pi: BLUEPRINT
+}

@@ -1,0 +1,7 @@
+test {
+    scalar_no_default: 42.0
+    sub {
+        subscalar: 9
+    }
+    oneof_value1: 11
+}

@@ -1,0 +1,19 @@
+searchbot {
+  max_batch_size: 700
+  model_path: "models/blueprint.pt"
+
+  plausible_orders_cfg {
+    n_plausible_orders: 8
+    max_actions_units_ratio: 3
+    req_size: 2100
+  }
+
+  n_rollouts: 100
+  rollouts_cfg {
+    n_threads: 56
+    temperature: 0.5
+    top_p: 0.95
+    average_n_rollouts: 1
+    max_rollout_length: 3
+  }
+}

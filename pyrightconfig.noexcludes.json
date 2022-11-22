@@ -1,0 +1,6 @@
+{
+    "reportOptionalSubscript": "warning",
+    "reportOptionalMemberAccess": "warning",
+    "stubPath": "",
+    "exclude": ["src", "thirdparty", "conf", "typings", "heyhi"]
+}

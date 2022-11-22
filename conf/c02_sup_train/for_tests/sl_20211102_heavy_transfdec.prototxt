@@ -1,0 +1,77 @@
+# Training config for an old in-development model, preserved only since
+# some unit tests use this config.
+includes { path: "launcher/slurm_8gpus.prototxt"; mount: "launcher" }
+train {
+    dataset_params: {
+        train_set_path: "PATH_TO_TRAIN.data";
+        val_set_path: "PATH_TO_VAL.data";
+        metadata_path: "PATH_TO_METADATA.json";
+        debug_only_opening_phase: false;
+        only_with_min_final_score: 0;
+        min_rating_percentile: 0.5;
+        exclude_n_holds: 3;
+    }
+
+    batch_size: 500;
+    lr: 0.001;
+    adam_beta2: 0.999
+    lr_decay: 0.99;
+    clip_grad_norm: 0.5;
+    checkpoint: "./checkpoint.pth";
+    teacher_force: 1.0;
+    lstm_layers: 2;
+    lstm_dropout: 0.2;
+    inter_emb_size: 112;
+    num_epochs: 400;
+    debug_no_mp: false;
+    skip_validation: false;
+    learnable_alignments: false;
+    use_simple_alignments: true;
+    avg_embedding: false;
+    write_jsonl: true;
+    value_decoder_init_scale: 0.01;
+    value_decoder_clip_grad_norm: 1e-7;
+    value_loss_weight: 0.7;
+    featurize_output: true;
+    relfeat_output: true;
+    value_softmax: true;
+    encoder {
+      transformer: {
+        activation: "gelu"
+        num_heads: 8;
+        ff_channels: 224;
+        num_blocks: 10;
+        dropout: 0.2;
+      }
+    };
+    transformer_decoder {
+      inner_dim: 256
+      featurize_input: true
+      featurize_output: true
+      explicit_location_input: true
+      transformer {
+        activation: "gelu"
+        num_heads: 8;
+        ff_channels: 512;
+        num_blocks: 4;
+        dropout: 0.2;
+        extra_normalization: true
+      }
+
+    }
+    use_default_requeue: true;
+    warmup_epochs: 20
+
+    use_v2_base_strategy_model: 1
+
+    input_version: 2;
+    training_permute_powers: true;
+
+    launcher {
+      slurm {
+        num_gpus: 32
+        volta32: 1
+        partition: "learnaccel"
+      }
+    }
+}

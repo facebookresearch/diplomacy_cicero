@@ -1,0 +1,8 @@
+includes {path: "agents/searchbot"; mount: "agent_one";}
+includes {path: "agents/base_strategy_model"; mount: "agent_six";}
+compare_agents {
+  power_one: AUSTRIA
+  seed: 0
+  out: "output.json"
+  draw_on_stalemate_years: 5
+}

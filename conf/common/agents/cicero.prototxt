@@ -1,0 +1,90 @@
+includes { path: "searchbot/qre_rol0_p30.prototxt"; mount: "bqre1p.base_searchbot_cfg" }
+includes { path: "orders/20220305_allorderindependentrollout_bilateralprefix.prototxt"; mount: "bqre1p.base_searchbot_cfg.parlai_model_orders" }
+includes { path: "dialogue/20220729_dialogue_rolloutevery_replythresh_firstmessagethresh_5m.prototxt"; mount: "bqre1p.base_searchbot_cfg.dialogue" }
+includes { path: "dialogue/nonsense_classifiers/20220728_ensemble_nonsense_classifier_speedpress_trial2_90recall.prototxt"; mount: "bqre1p.base_searchbot_cfg.dialogue.ensemble_nonsense_classifier" }
+
+bqre1p {
+    base_searchbot_cfg {
+      model_path: "models/rl_search_orders.ckpt"
+      value_model_path: "models/rl_value_function.ckpt"
+
+      br_corr_bilateral_search {
+        enable_for_pseudo_order: True
+        enable_for_final_order: True
+        use_all_power_for_p_joint: True
+        br_regularize_lambda: 3e-3
+        min_unnormalized_weight: 0.02
+        max_unnormalized_weight: 10
+      }
+
+      rollouts_cfg {
+          year_spring_prob_of_ending: "1901,0.0;1909,1.0"
+      }
+
+      message_search {
+        n_messages: 8
+        strategy: FILTER
+        filter_top_k: 5
+      }
+
+      plausible_orders_cfg {
+        do_parlai_rescoring: true
+        n_rescore: 30
+        parlai_req_size: 30
+        parlai_batch_size: 30
+        n_plausible_orders: 35
+        batch_size: 512
+        allow_multi_gpu: 1
+        exclude_n_holds: 3
+      }
+
+      br_corr_bilateral_search {
+        bilateral_search_num_cond_sample: 20
+      }
+
+      bp_iters: 0  # Disabling.
+      n_rollouts: 256
+      loser_bp_value: 0  # Disabling.
+      loser_bp_iter: 0  # Disabling.
+
+      cfr_messages: true
+      do_incremental_search: true
+      use_truthful_pseudoorders: true
+      skip_policy_evaluation_for_truthful_pseudoorders: true
+      use_greedy_po_for_rollout: true
+      half_precision: true
+
+      bilateral_dialogue {
+        strategy: BEST_POP
+      }
+
+      parlai_model_orders {
+        model_path: "models/cicero_imitation_bilateral_orders_prefix"
+      }
+
+      dialogue {
+        pseudo_orders_correspondence_threshold: -5e-3
+        rating_threshold_first_message: 1.0  # this means disabled
+        use_pseudoorders_initiate_sleep_heuristic: true
+        grounding_last_playable_year: 1908  # For speedpress
+        initial_message_prompts_path: "models/markus_5m_prompts.json"
+        block_initiation_if_pred_value_below: 0.01
+        use_last_phase_silence_except_coordination_heuristic: true
+      }
+    }
+    player_types {
+      log_uniform {
+        min_lambda: 1e-3
+        max_lambda: 3e-1
+      }
+    }
+    do_bayesian_updates: False  # webdip servicer currently doesn't support bayesian update
+    num_player_types: 6
+    agent_type: 2 # 1-based -> lambda=3e-3
+    agent_type_is_public: false
+
+    scale_lambdas_1901_spring: 10.0
+    dynamic_lambda_stdev_espilon: 0.01
+    dynamic_lambda_stdev_baseline: 0.05
+    dynamic_lambda_stdev_num_samples: 100
+}

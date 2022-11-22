@@ -1,0 +1,2 @@
+{"dialog": [[{"game_id": 1, "phase_id": "S1901M", "player": "ENGLAND", "text": " S1901M England:\nS1901M\nEngland -> Germany: Hello [EO_M]", "episode_done": true, "example_id": "10", "id": "Valid Teacher Test", "eval_labels": ["REAL"]}]]}
+{"dialog": [[{"game_id": 2, "phase_id": "S1901M", "player": "ENGLAND", "text": "S1901M\nEngland -> Germany: Hi there [EO_M]", "episode_done": true, "example_id": "20", "id": "Valid Teacher Test", "eval_labels": ["CORRUPTED"]}]]}

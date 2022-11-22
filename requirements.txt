@@ -1,0 +1,49 @@
+#
+# please keep these sorted!!
+#
+attrs==20.2.0
+black==19.10b0
+colored==1.4.3
+datasets==1.18.4
+dacite==1.6.0
+ephemeral-port-reserve==1.1.4
+fairseq==0.10.2
+flask==1.1.4
+ipdb==0.13.9
+joblib==1.1.0
+jupyter==1.0.0
+matplotlib==3.5.1
+nose-timer==1.0.1
+nose==1.3.7
+numba==0.54.1
+numpy==1.20.3
+nvidia-ml-py3==7.352.0
+pandas==1.3.5
+parameterized==0.8.1
+parlai @ git+https://github.com/facebookresearch/ParlAI.git@5214f42a2058ef335f91f5afe66b2bd9ebfb2fbe
+pre-commit==2.17.0
+psutil==5.9.0
+pygtrie==2.4.2
+pytest==6.2.1
+pytorch-pretrained-bert==0.6.2
+requests==2.27.1
+requests_futures==1.0.0
+redis==4.1.4
+seaborn==0.11.2
+submitit==1.4.1
+tabulate==0.8.9
+tensorboard==2.8.0
+termcolor==1.1.0
+tokenizers==0.10.3
+torchtext==0.8.1
+torch  # not specifying explicit version due to aws/fair discrepancy. install_deps will install exact version
+transformers==4.12.5
+tqdm==4.62.1
+typer==0.4.1
+wandb==0.12.11
+
+protobuf==3.19.1
+mypy-protobuf==2.10
+
+# temporary fix for https://github.com/aws/aws-sam-cli/issues/3661
+markupsafe==2.0.1

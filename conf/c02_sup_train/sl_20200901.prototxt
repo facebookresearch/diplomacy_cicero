@@ -1,0 +1,40 @@
+# Baseline BC/SL model for learning policy and value from human data.
+# This file is provided for posterity as a record of various training parameters
+# Actually running this configuration to train a model requires obtaining the data,
+# as well as some nontrivial preprocessing of that data.
+train {
+    dataset_params: {
+        train_set_path: "PATH_TO_TRAIN.data";
+        val_set_path: "PATH_TO_VAL.data";
+        metadata_path: "PATH_TO_METADATA.json";
+        debug_only_opening_phase: false;
+        only_with_min_final_score: 0;
+        min_rating_percentile: 0.5;
+    }
+
+    batch_size: 1000;
+    lr: 0.001;
+    lr_decay: 0.99;
+    clip_grad_norm: 0.5;
+    checkpoint: "./checkpoint.pth";
+    teacher_force: 1.0;
+    lstm_layers: 2;
+    lstm_dropout: 0.2;
+    encoder_dropout: 0.4;
+    num_encoder_blocks: 8;
+    num_epochs: 200;
+    debug_no_mp: false;
+    skip_validation: false;
+    learnable_A: false;
+    learnable_alignments: false;
+    avg_embedding: false;
+    write_jsonl: true;
+    value_decoder_init_scale: 0.01;
+    value_decoder_clip_grad_norm: 1e-7;
+    value_loss_weight: 0.7;
+    featurize_output: true;
+    relfeat_output: true;
+    residual_linear: true;
+    merged_gnn: true;
+    value_softmax: true;
+}

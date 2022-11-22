@@ -1,0 +1,6 @@
+# Don't change this anymore -- create a new protoxt for new default configs.
+# Keeping this for posterity.
+base_strategy_model {
+    model_path: "models/blueprint.pt"
+    temperature: 0.1
+}

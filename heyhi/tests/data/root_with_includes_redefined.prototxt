@@ -1,0 +1,8 @@
+includes { mount: "sub", path: "redefine_subscalar_22" }
+includes { mount: "sub2", path: "redefine_subscalar_22" }
+test {
+    # This must take priority over the include.
+    sub2 {
+        subscalar:99
+    }
+}

@@ -1,0 +1,160 @@
+nonsense_classifiers {
+  name: "location"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/location"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.05
+    }
+  }
+}
+nonsense_classifiers {
+  name: "power"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/power"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.9
+    }
+  }
+}
+nonsense_classifiers {
+  name: "symbol"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/symbol"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.05
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_with_no_message_history"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/hvm_no_msg_hist"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.7
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_singleseed_2Mphasesorderhistory_150000steps"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/hvm_2mphase_orderhistory"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.5
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_singleseed_seed2_2Mphasesorderhistory_2Mphasesstatehistory_150000steps"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_singleseed_seed2_2Mphasesorderhistory_2Mphasesstatehistory_150000steps"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.6
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_no_speaker_dialogue"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_singleseed_nospeaker_nobilat"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.6
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_4MPhasesOrderHistory_1epoch_seed3"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_singleseed_seed3_4MPhasesOrderHistory"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.6
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_no_speaker_dialogue_bilateral_fixed"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_singleseed_nospeaker_bilateral"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.6
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvwm"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/hvwm"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.5
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_NEW_justifications_2seeds"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_justifications"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.7
+    }
+  }
+}
+nonsense_classifiers {
+  name: "non_sequitur_detector"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/nonsequitur_detector"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.9
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_3seeds"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_singleseed_3seeds"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.5
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_finetuned_cardinals"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_cardinals"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.7
+    }
+  }
+}
+nonsense_classifiers {
+  name: "hvm_2seeds_2mphase_orderhistory_statehistory"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/hvm_2seeds_2mphase_orderhistory_statehistory"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.5
+    }
+  }
+}
+nonsense_classifiers {
+  name: "negations_classifier"
+  nonsense_classifier{
+    model_path: "models/nonsense_ensemble/humanvsmodel_nonsense_classifier_denoising_negations"
+    overrides: {
+        set_player_rating: 5
+        threshold: 0.7
+    }
+  }
+}

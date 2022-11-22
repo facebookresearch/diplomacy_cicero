@@ -1,0 +1,26 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: trailing-whitespace
+        exclude: ^fairdiplomacy/viz/web/build
+-   repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+    -   id: black
+        additional_dependencies: ['click==8.0.4']
+-   repo: local
+    hooks:
+    -   id: clang-format
+        name: clang-format
+        description: Format proto files with clang-format
+        entry: clang-format-8 -i
+        language: system
+        files: ^conf/.*\.(proto)$
+    -   id: clang-format-dipcc
+        name: clang-format-dipcc
+        description: Format dipcc files with clang-format
+        entry: clang-format-8 -i
+        language: system
+        files: ^dipcc/dipcc/(cc|pybind)/.*\.(cc|h)$
+exclude: '^(thirdpary|src)/'

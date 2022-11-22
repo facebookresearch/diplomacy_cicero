@@ -1,0 +1,8 @@
+# this one has centers as input
+model_path: "models/cicero_imitation_bilateral_orders_prefix"
+overrides: {
+  inference: "topk"
+  topk: 10
+  temperature: 0.75
+  set_player_rating: 5
+}

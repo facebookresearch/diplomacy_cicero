@@ -1,0 +1,181 @@
+/*
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+This source code is licensed under the MIT license found in the
+LICENSE file in the root directory of this source tree.
+*/
+// Format this file with clang after editing:
+//   clang-format-8 conf/*.proto -i
+syntax = "proto2";
+package fairdiplomacy;
+
+import public "conf/common.proto";
+
+message GameSituation {
+  // Required. Unique name of the situation.
+  optional string name = 1;
+  // Required. The path to the game.json.
+  optional string game_path = 2;
+  // Required. Positive value refers to a specific message. -1 refers to end
+  // of the phase, i.e., after all messages and orders are produced.
+  // In both cases situation refers to the last emited event (message/orders).
+  optional int64 time_sent = 3;
+  // Required. Phase of the game.
+  optional string phase = 4;
+  // Required. Point-of-view power.
+  optional Power pov_power = 5;
+  // Optional. Natural language description of what's going on.
+  optional string comment = 6;
+  // Optional. A list of arbitraty tags for the situation.
+  repeated string tags = 7;
+
+  message OrdersOrPseudoOrdersTest {
+    // Optional. Name of test.
+    optional string name = 1;
+    // Required. Test as a stringified Python expression.
+    // Ex: 'has_order(r, "A PAR - BUR") and not has_order(r, "A MOS - LVN")'
+    optional string test = 2;
+  }
+
+  // Optional. Named tests that pseudo-orders or orders should pass (can derive
+  // which from time_sent field).
+  repeated OrdersOrPseudoOrdersTest tests = 8;
+
+  // Optional. Target power for situation.
+  optional Power target_power = 10;
+
+  // ##### META ########
+  // Optional. Aded by user (for automated edits).
+  optional string added_user = 100;
+  // Optional. Aded at (for automated edits).
+  optional string added_datetime = 101;
+  // Optional. Path to the original game.jsom.
+  optional string orig_game_path = 102;
+}
+
+message GameSituationSet { repeated GameSituation situations = 1; }
+
+// Single game with one or more annotations.
+// Could be annotation of a whole game, or some particual game situation in a
+// game.
+
+message AnnotatedGame {
+  message Annotation {
+
+    message GameMessage {
+      required Power sender = 1;
+      required Power recipient = 2;
+      optional string content = 3;
+      optional int64 timestamp = 4;
+    }
+
+    message GameMessageList { repeated GameMessage messages = 1; }
+
+    message JointAction {
+      // map from power-name to representation of the action e.g. ('A PAR -
+      // BUR', 'A MAR - PIC')
+      repeated string powers = 1;
+      repeated string actions = 2;
+    }
+
+    message FilterAnnotation {
+      optional string annotation = 1;
+      optional string extra_context = 2;
+    }
+
+    message TokenDetails {
+      repeated string tokens = 1;
+      repeated float probs = 2;
+      repeated float ranks = 3;
+      repeated string top_ranked_tokens = 4;
+      repeated float cdfs = 5;
+    }
+
+    message MessageProposal {
+      optional string target_power = 1;
+      optional string msg = 2;
+      optional string approval_status = 3;
+      repeated string tags = 4;
+    }
+
+    // See fairdiplomacy.webdip.message_approval_cache class of same name
+    message MessageReviewData {
+      optional string power = 1;
+      repeated MessageProposal msg_proposals = 2;
+      optional int64 wakeup_time = 3;
+      optional int64 last_timestamp_when_produced = 4;
+      optional int64 last_serviced = 5;
+      optional string user = 6;
+      optional string comment = 7;
+      optional string id = 8;
+    }
+
+    message AnnotationContent {
+      oneof content_type {
+        string plain_text = 1;
+        // A list of counterfactual messages that a power might have sent
+        GameMessageList message_list = 2;
+        // pseudo-orders
+        JointAction pseudo_orders = 3;
+        // Filter annotations
+        FilterAnnotation filter_annotations = 4;
+        // Token details
+        TokenDetails token_details = 5;
+        // Message Review annotations
+        MessageReviewData message_review_annotations = 6;
+      }
+    }
+
+    // Required. Phase of the game
+    optional string phase = 1;
+
+    oneof annotation_for {
+      // The annotation will appear after the message.
+      int64 message_at = 2;
+      // The anotation will appear before any messages.
+      bool start_of_phase = 3;
+      // The anotation will appear after orders and is related to the orders.
+      bool orders = 4;
+    }
+
+    optional AnnotationContent content = 5;
+
+    repeated Metric metrics = 6;
+
+    // A label of the type of annotation. This label will be visualized and can
+    // be used to filter which annotations are shown.
+    optional string label = 7;
+  }
+
+  // Arbitrary metrics per game or per annotation. Will be showed per game and
+  // in aggregated form.
+  message Metric {
+    optional string name = 1;
+    optional float value = 2;
+  }
+
+  // Required. Default game_path to use.
+  optional string game_path = 1;
+
+  // Optional. Point-of-view power. Will filter messages by default for this
+  // power.
+  oneof maybe_pov_power { Power pov_power = 2; }
+
+  repeated Annotation annotations = 3;
+  repeated Metric metrics = 5;
+}
+
+// AnnotationCollection is a collection of annotations for one or several games.
+// It is intendeded to visualize different game situations.
+message AnnotationCollection {
+  // A description or explanation of what a particular metric is.
+  message MetricDescription {
+    optional string name = 1;
+    optional string description = 2;
+  }
+
+  repeated AnnotatedGame game_annotations = 1;
+  // Optional. A list of descriptions for metrics used in AnnotatedGame's.
+  // Will be shown in viz as tooltips.
+  repeated MetricDescription metric_descriptions = 2;
+}

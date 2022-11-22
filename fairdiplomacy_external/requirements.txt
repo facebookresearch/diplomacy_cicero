@@ -1,0 +1,1 @@
+diplomacy @ git+http://github.com/diplomacy/diplomacy.git@df1d0892ce27501386d8dbf2e9948055ea960445

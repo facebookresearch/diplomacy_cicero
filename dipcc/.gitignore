@@ -1,0 +1,12 @@
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+out
+CTestTestfile.cmake
+googletest
+**/*.nfs*
+**/gmon.out
+**/*.pkl.bak
+**/*.so
+dipcc/python/dipcc.egg-info/

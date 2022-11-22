@@ -1,0 +1,48 @@
+compare_agent_population {
+  agents {
+    key: "base_strategy_model"
+    value {
+        base_strategy_model {
+            model_path: "models/base_strategy_model_0_5_policy.ckpt"
+            temperature: 0.1
+       }
+    }
+  }
+
+  agents {
+    key: "the_searchbot"
+    value {
+      searchbot {
+        max_batch_size: 700
+        model_path: "blueprint.pt"
+
+        plausible_orders_cfg {
+          n_plausible_orders: 8
+          max_actions_units_ratio: 3
+          req_size: 2100
+        }
+
+        n_rollouts: 100
+        rollouts_cfg {
+          n_threads: 56
+          temperature: 0.5
+          top_p: 0.95
+          average_n_rollouts: 1
+          max_rollout_length: 3
+        }
+      }
+    }
+  }
+
+  agent_AUSTRIA: "the_searchbot"
+  agent_ENGLAND: "the_searchbot"
+  agent_FRANCE: "the_searchbot"
+  agent_GERMANY: "the_searchbot"
+  agent_ITALY: "base_strategy_model"
+  agent_RUSSIA: "base_strategy_model"
+  agent_TURKEY: "base_strategy_model"
+
+  seed: 0
+  out: "output.json"
+  draw_on_stalemate_years: 5
+}

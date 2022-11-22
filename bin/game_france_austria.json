@@ -1,0 +1,77 @@
+{
+  "id": "CvEV42HsKzra",
+  "map": "fva",
+  "phases": [
+    {
+      "messages": [],
+      "name": "S1901M",
+      "orders": {},
+      "results": {},
+      "state": {
+        "builds": {
+          "AUSTRIA": { "count": 0, "homes": [] },
+          "ENGLAND": { "count": 0, "homes": [] },
+          "FRANCE": { "count": 0, "homes": [] },
+          "GERMANY": { "count": 0, "homes": [] },
+          "ITALY": { "count": 0, "homes": [] },
+          "RUSSIA": { "count": 0, "homes": [] },
+          "TURKEY": { "count": 0, "homes": [] }
+        },
+        "centers": {
+          "AUSTRIA": [ "VIE", "TRI", "BUD" ],
+          "ENGLAND": [],
+          "FRANCE": [ "BRE", "PAR", "MAR" ],
+          "GERMANY": [],
+          "ITALY": [],
+          "RUSSIA": [],
+          "TURKEY": []
+        },
+        "homes": {
+          "AUSTRIA": [ "BUD", "TRI", "VIE" ],
+          "ENGLAND": [ "EDI", "LON", "LVP" ],
+          "FRANCE": [ "BRE", "MAR", "PAR" ],
+          "GERMANY": [ "BER", "KIE", "MUN" ],
+          "ITALY": [ "NAP", "ROM", "VEN" ],
+          "RUSSIA": [ "MOS", "SEV", "STP", "WAR" ],
+          "TURKEY": [ "ANK", "CON", "SMY" ]
+        },
+        "name": "S1901M",
+        "retreats": {
+          "AUSTRIA": {},
+          "ENGLAND": {},
+          "FRANCE": {},
+          "GERMANY": {},
+          "ITALY": {},
+          "RUSSIA": {},
+          "TURKEY": {}
+        },
+        "units": {
+          "AUSTRIA": [
+            "A VIE",
+            "F TRI",
+            "A BUD"
+          ],
+          "ENGLAND": [
+          ],
+          "FRANCE": [
+            "F BRE",
+            "A PAR",
+            "A MAR"
+          ],
+          "GERMANY": [
+          ],
+          "ITALY": [
+          ],
+          "RUSSIA": [
+          ],
+          "TURKEY": [
+          ]
+        }
+      }
+    }
+  ],
+  "rules": [
+    "NO_PRESS",
+    "POWER_CHOICE"
+  ]
+}

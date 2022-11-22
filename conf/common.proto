@@ -1,0 +1,33 @@
+/*
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+This source code is licensed under the MIT license found in the
+LICENSE file in the root directory of this source tree.
+*/
+syntax = "proto2";
+package fairdiplomacy;
+
+// Every config is parsed as Cfg that is thin wrapper over actual config for the
+// task. Config inlude. Handled by HH.
+message Include {
+  // It's expected that <conf_dir>/<path>.prototxt exists. HeyHi will try a
+  // series of different conf_dir's. It's easier to give an example. Let
+  // assume that path to meta config is conf/c01/conf.prototxt and the include
+  // is {path:slurm, mount:launcher}. Then HeyHi will try the following paths:
+  // {conf/c01,conf/common,conf/c01/launcher,conf/common/launcher}/slurm.prototxt.
+  // Obviously, if mount is root, then the latter 2 paths are omitted.
+  optional string path = 1;
+  // Dot-separated path to where to include the include within the main config.
+  optional string mount = 2;
+}
+
+// The order here is expected to match fairdiplomacy.models.consts.POWERS
+enum Power {
+  AUSTRIA = 0;
+  ENGLAND = 1;
+  FRANCE = 2;
+  GERMANY = 3;
+  ITALY = 4;
+  RUSSIA = 5;
+  TURKEY = 6;
+}

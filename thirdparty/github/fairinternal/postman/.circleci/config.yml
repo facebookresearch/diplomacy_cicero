@@ -1,0 +1,94 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: ubuntu:bionic-20190612
+    steps:
+      - checkout
+      # Install conda.
+      - run:
+         command: |
+          apt-get update
+          apt-get install build-essential wget git --yes
+          wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.7.10-Linux-x86_64.sh
+          mkdir ~/.conda
+          bash Miniconda3-4.7.10-Linux-x86_64.sh -b -p /opt/conda
+          rm Miniconda3-4.7.10-Linux-x86_64.sh
+          ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+          echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+          echo "conda activate base" >> ~/.bashrc
+          find /opt/conda/ -follow -type f -name '*.a' -delete
+          find /opt/conda/ -follow -type f -name '*.js.map' -delete
+          /opt/conda/bin/conda clean -afy
+          . /opt/conda/etc/profile.d/conda.sh
+          conda info --envs
+      - run:
+         command: |
+           apt-get update
+           apt-get install --yes cmake build-essential autoconf libtool pkg-config
+      - restore_cache:
+          keys:
+            - v04-conda
+      - run:
+         command: |
+           . /opt/conda/etc/profile.d/conda.sh
+           if [[ ! -d /opt/conda/envs/games ]]; then
+              conda create --yes -n games python=3.7
+              conda init bash && . ~/.bashrc && conda activate games
+              # Postman dependencies.
+              conda install pytorch==1.5 cpuonly -c pytorch --yes
+              # For boringssl in grpc.
+              conda install go --yes
+           fi
+      - save_cache:
+          key: v04-conda
+          paths: /opt/conda/envs/games/
+      - run:
+         command: |
+           . /opt/conda/etc/profile.d/conda.sh && conda init bash && . ~/.bashrc && conda activate games
+           make compile_slow
+      - run:
+         command: |
+           . /opt/conda/etc/profile.d/conda.sh && conda init bash && . ~/.bashrc && conda activate games
+           pip install -e nest/
+           python nest/nest_test.py
+      - run:
+         command: |
+           . /opt/conda/etc/profile.d/conda.sh && conda init bash && . ~/.bashrc && conda activate games
+           pip install -e postman/
+           cd /
+           # Check that import works.
+           python -c "import postman"
+           # Run the Python tests.
+           python -m unittest discover -s /root/project/postman/tests/python/ -p '*_test.py'
+           # Run C++ tests.
+           make -C /root/project/cmake_build/postman test
+      - run:
+         command: |
+           . /opt/conda/etc/profile.d/conda.sh && conda init bash && . ~/.bashrc && conda activate games
+           cd buffer
+           make compile_slow
+           cd ..
+           pip install -e buffer/
+           cd /
+           # Check that import works.
+           python -c "import buffer"
+           # Run the Python tests.
+           python -m unittest discover -s /root/project/buffer/tests/ -p '*_test.py'
+  precommit:
+    docker:
+      - image: continuumio/miniconda3:4.6.14
+    steps:
+      - checkout
+      - run:
+         command: |
+            pip install pre-commit
+            pre-commit install
+            pre-commit run --all-files
+
+workflows:
+  version: 2
+  build-postman:
+    jobs:
+      - build: {}
+      - precommit: {}

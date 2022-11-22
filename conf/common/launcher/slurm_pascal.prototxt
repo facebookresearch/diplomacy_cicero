@@ -1,0 +1,9 @@
+slurm {
+  num_gpus: 2
+  cpus_per_gpu: 40
+  partition: "learnaccel"
+  pascal: true
+  hours: 72
+  mem_per_gpu: 60
+  single_task_per_node: true
+}

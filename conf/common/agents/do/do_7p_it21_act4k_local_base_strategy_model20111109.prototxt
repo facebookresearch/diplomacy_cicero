@@ -1,0 +1,18 @@
+max_iters: 21
+min_diff: 0.04
+min_diff_percentage: 10
+max_op_actions: 5
+use_exact_op_policy: 0
+shuffle_powers: 1
+generation {
+    max_actions: 4000
+    local_uniform {
+        num_base_actions: 5
+        use_search_policy: 1
+        fix_uncoordinated_base: 1
+        with_holes: 1
+    }
+    base_strategy_model {
+        model_path: "models/no_press_human_imitation_policy.ckpt"
+    }
+}

@@ -1,0 +1,22 @@
+# validate: not_task_config
+# This is an example config used for population sweeps. You can run it for example like:
+# python slurm/compare_agent_population.py
+# --num_games=10
+# --agent_mapping=conf/ag_pop_cmp/example_agent_mapping.prototxt
+# --exp="mypopulationsweep"
+agent {
+    name: "base_strategy_model_20200827_iclr"
+    cfg: "base_strategy_model_20200827_iclr_v_humans"
+}
+agent {
+    name: "base_strategy_model_20210616"
+    cfg: "base_strategy_model_20210616"
+}
+agent {
+    name: "fastbot-r0"
+    cfg: "searchbot_02_fastbot"
+    overrides: [
+        "searchbot.rollouts_cfg.max_rollout_length=0",
+        "searchbot.cache_rollout_results=True"
+    ]
+}

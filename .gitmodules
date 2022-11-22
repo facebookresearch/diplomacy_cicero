@@ -1,0 +1,7 @@
+[submodule "third_party/grpc"]
+	path = thirdparty/github/fairinternal/postman/third_party/grpc
+	url = https://github.com/grpc/grpc.git
+	branch = v1.20.x
+[submodule "third_party/pybind11"]
+	path = thirdparty/github/fairinternal/postman/third_party/pybind11
+	url = https://github.com/pybind/pybind11

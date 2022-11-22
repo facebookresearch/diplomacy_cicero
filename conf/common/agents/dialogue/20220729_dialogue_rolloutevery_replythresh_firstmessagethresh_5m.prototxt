@@ -1,0 +1,67 @@
+
+# Dialogue model which also has the ability to draw
+# Dialogue model which has seen draw messages and generic [REDACTED] tokens
+# Dialogue model which is conditioned on rollout pseudo orders for *every* phase
+model_dialogue {
+  model_path: "models/dialogue"
+  overrides: {
+      inference: "nucleus"
+      topp: 0.9
+      beam_size: 1
+      set_player_rating: 5
+  }
+}
+
+# sleepsix model
+# p(inf) threshold = 0.1
+model_sleep_classifier {
+  model_path: "models/sleep_classifier"
+  overrides: {
+      set_player_rating: 5
+  }
+}
+sleep_inf_threshold: 0.1
+sleep_inf_threshold_reply: 0.75
+
+
+# Imitation intent model trained to rollout through the next movement phase on every phase
+# Imitation intent model -- trained to see only generic [REDACTED] tokens instead of redaction ids
+# Has also been trained to see draw messages in the context
+model_pseudo_orders {
+    model_path: "models/imitation_intent"
+    overrides: {
+      inference: "topk"
+      set_player_rating: 5
+    }
+}
+
+# Draw classifier
+model_draw_classifier {
+    model_path: "models/draw_classifier"
+    overrides: {
+      set_player_rating: 5
+    }
+}
+
+resample_dialogue_on_filter: 10
+
+rating_threshold_first_message: 0.05
+
+reuse_pseudo_for_consecutive_messages: true
+allow_multi_gpu: true
+pseudo_orders_correspondence_threshold: -1
+
+
+initial_message_prompts_path: "models/markus_5m_prompts.json"
+initial_message_prompts_count: 2
+initial_message_prompt_spacing_seconds: 15
+
+binarize_sleep_times_in_5m_games: true
+
+should_filter_grounding: true
+limit_consecutive_outbound_messages: 2
+
+rating_threshold_other: 1.00
+
+initiate_sleep_heuristic_every_phase: false
+use_initiate_sleep_heuristic_n_years: 2

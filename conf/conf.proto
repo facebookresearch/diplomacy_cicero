@@ -1,0 +1,1371 @@
+/*
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+This source code is licensed under the MIT license found in the
+LICENSE file in the root directory of this source tree.
+*/
+// Format this file with clang after editing:
+//   clang-format-8 conf/*.proto -i
+syntax = "proto2";
+package fairdiplomacy;
+
+import public "conf/agents.proto";
+import public "conf/misc.proto";
+import public "conf/common.proto";
+
+// Launcher message defines how to launch the job. Two options are avilable -
+// locally or on slurm. Launcher information is expected to be a part of the
+// main config.
+message Launcher {
+
+  message Local { optional bool use_local = 1; }
+
+  message Slurm {
+    optional int32 num_gpus = 1 [ default = 0 ];
+    // By default starting one task per GPU. But if this flag is set, then
+    // will use one task per machine.
+    optional bool single_task_per_node = 2 [ default = false ];
+
+    optional string partition = 3 [ default = "learnaccel" ];
+
+    optional int32 hours = 4;
+    // Memory per GPU in GB.
+    optional int32 mem_per_gpu = 5 [ default = 62 ];
+    optional string comment = 6;
+
+    // Number of CPUs per GPU. You probably want 40 on Pascals and 10 otherwise.
+    optional int32 cpus_per_gpu = 7 [ default = 10 ];
+
+    // If set, will schedule job only on volta GPUs with 32GB of mem.
+    optional bool volta32 = 8;
+    // If set, will schedule the job only on Pascal GPUs.
+    optional bool pascal = 9;
+    // If set, will schedule job only on volta GPUs.
+    optional bool volta = 10;
+  }
+
+  oneof launcher {
+    Local local = 1;
+    Slurm slurm = 2;
+  }
+}
+
+// Root config to compare agents.
+message CompareAgentsTask {
+  optional Agent agent_one = 2;
+  // Ignored if use_shared_agent.
+  optional Agent agent_six = 3;
+  optional Agent cf_agent = 4;
+
+  optional Power power_one = 5;
+
+  optional string out = 6;
+  optional int32 seed = 7 [ default = -1 ];
+
+  // Optional. For tests - max number of turns to run.
+  optional int32 max_turns = 8;
+  optional int32 max_year = 9 [ default = 1935 ];
+
+  // Optional. If set, agent_six is ignored, and agent_one is used to get all
+  // strategies. Enable share_strategy on CFR to get speed up.
+  optional bool use_shared_agent = 10;
+
+  // Optional. If set, then the agents starts from the last phase in the game
+  // unless start_phase is set.
+  optional string start_game = 11;
+  // Optional. Only applies to the case when start_game is set.
+  optional string start_phase = 12;
+
+  // Optional. If set, will draw after this number of years with SC ownership
+  // trasnfer (detected by dipcc).
+  optional int32 draw_on_stalemate_years = 13;
+
+  // If positive, end messaging after this many messages have been sent.
+  optional int32 max_msg_iters = 14 [ default = -1 ];
+
+  // Capture agent logging to the game json file
+  optional bool capture_logs = 15;
+
+  // Use time-based messaging protocol, with this much time per phase, in
+  // centiseconds.
+  optional int32 time_per_phase = 16 [ default = 8640000 ];
+
+  // Use the provided base_strategy_model model to perform variance reduction
+  optional string variance_reduction_model_path = 17;
+
+  // If set, will stop eval as soon as agent_one is dead. The resulting
+  // game.json will be incomplete (not till end of game), but the stats should
+  // be fine.
+  // This flag must be false, if use_shared_agent is true.
+  optional bool stop_on_death = 18 [ default = true ];
+
+  // Optional. If false, we compute policy for each of 7 powers independently,
+  // i.e., one call per power. If true, then strategies for 6 non power_one
+  // power (if use_shared_agent is false) or for all powers (if use_shared_agent
+  // is true) are computed with a single call and used for all agents. Only
+  // sensible for no-press!
+  optional bool share_strategy = 19 [ default = false ];
+
+  // Optional. A string of "year,prob;year,prob;..."
+  // "year,prob" indicates that at the start of SPRING of that year or later
+  // years there is a probability of the game ending instantly and being scored
+  // as-is,
+  optional string year_spring_prob_of_ending = 20;
+
+  optional int32 num_processes = 90
+      [ default = 0 ];                            // for data collection only!
+  optional int32 num_trials = 91 [ default = 0 ]; // for data collection only!
+}
+
+// Root config to compare agents.
+message CompareAgentPopulationTask {
+
+  message NamedAgent {
+    optional string key = 1;
+    optional Agent value = 2;
+  }
+  repeated NamedAgent agents = 1;
+
+  optional string agent_AUSTRIA = 2;
+  optional string agent_ENGLAND = 3;
+  optional string agent_FRANCE = 4;
+  optional string agent_GERMANY = 5;
+  optional string agent_ITALY = 6;
+  optional string agent_RUSSIA = 7;
+  optional string agent_TURKEY = 8;
+
+  optional string out = 10;
+  optional int32 seed = 11 [ default = -1 ];
+
+  // Optional. For tests - max number of turns to run.
+  optional int32 max_turns = 12;
+  optional int32 max_year = 13 [ default = 1935 ];
+
+  // Optional. If set, then the agents starts from the last phase in the game
+  // unless start_phase is set.
+  optional string start_game = 14;
+  // Optional. Only applies to the case when start_game is set.
+  optional string start_phase = 15;
+
+  // Optional. If set, will draw after this number of years with SC ownership
+  // trasnfer (detected by dipcc).
+  optional int32 draw_on_stalemate_years = 16;
+
+  // End messaging after this many round robin opportunities for a power to
+  // speak.
+  optional int32 max_msg_iters = 17 [ default = -1 ];
+
+  // Capture agent logging to the game json file
+  optional bool capture_logs = 18;
+
+  // Use time-based messaging protocol, with this much time per phase, in
+  // centiseconds.
+  optional int32 time_per_phase = 19 [ default = 8640000 ];
+
+  // Optional. A string of "year,prob;year,prob;..."
+  // "year,prob" indicates that at the start of SPRING of that year or later
+  // years there is a probability of the game ending instantly and being scored
+  // as-is,
+  optional string year_spring_prob_of_ending = 20;
+}
+
+// Specifies the agents in a population, used to generate
+// CompareAgentPopulationTask
+message CompareAgentPopulationMapping {
+  message MappingEntry {
+    // Identifier for displaying and printing results.
+    optional string name = 1;
+    // This can be the name of a common agent without the ".prototxt", such as
+    // "searchbot_02_fastbot".
+    // Or it can be a path to an agent cfg relative to repo root, including
+    // encoding with ".prototxt". Or it can be an absolute path to an agent
+    // config anywhere on filesystem.
+    optional string cfg = 2;
+    // Overrides to feed back to heyhi when building the agent,
+    // like "searchbot.rollouts_cfg.max_rollout_length=0".
+    repeated string overrides = 3;
+
+    // Every population must have at least this number of agents of this type.
+    optional int32 min_count = 4 [ default = 0 ];
+  }
+  // Agents to randomize over in population match.
+  repeated MappingEntry agent = 1;
+}
+
+message NoPressDatasetParams {
+  // Train dataset file
+  // Expected format: one json file per line, each line is
+  // "<path><space><json>\n" i.e. the result of: for g in
+  // /path/to/jsons/game_*.json ; do echo -n "$g " && cat $g ; done
+  optional string train_set_path = 1;
+
+  // Validation datset file, same format as above
+  optional string val_set_path = 2;
+
+  // Path to file containing game metadata.
+  optional string metadata_path = 12;
+
+  // Dataloader procs (1 means load in the main process).
+  optional int32 num_dataloader_workers = 3 [ default = 80 ];
+
+  // Minimal score (num SC) of the at the enf of the game needed to include the
+  // power into the training set.
+  optional int32 only_with_min_final_score = 4;
+
+  // exclude actions with >=n units, all holds, from the dataset
+  optional int32 exclude_n_holds = 5 [ default = -1 ];
+
+  // DEPRECATED
+  optional bool debug_only_opening_phase = 6 [ deprecated = true ];
+
+  // DEPRECATED
+  optional float value_decay_alpha = 7 [ deprecated = true ];
+
+  // Optional path to dir containing json files with state values.
+  optional string value_dir = 8;
+
+  // Optional. If specified, use this agent's orders instead of the orders in
+  // the game.json
+  optional Agent cf_agent = 9;
+
+  // Optional, only valid with cf_agent. If > 1, sample cf_agent multiple
+  // times, saving each as a separate row in the db.
+  optional uint32 n_cf_agent_samples = 10 [ default = 1 ];
+
+  // For debugging: use only the first n games of dataset, if > 0
+  optional int32 limit_n_games = 11 [ default = -1 ];
+
+  // cut this percentile of games based on player rating
+  // (only for dataset with player ratings)
+  optional float min_rating_percentile = 13 [ default = 0 ];
+
+  // cut players with fewer than this many games
+  optional float min_total_games = 14 [ default = 0 ];
+
+  // If an invalid order or ultra-long convoy is specified but the
+  // army/fleet specified is well-formed, convert it into a hold.
+  optional bool return_hold_for_invalid = 15 [ default = false ];
+
+  // DEPRECATED
+  optional string data_dir = 500 [ deprecated = true ];
+}
+
+message Encoder {
+  message Transformer {
+    // Number of attention heads. Must evenly divide inter_emb_size * 2.
+    optional int32 num_heads = 1;
+
+    // Number of intermediate channels for the feed-forward component
+    optional int32 ff_channels = 2;
+
+    // Number of transformer layers in the encoder
+    optional int32 num_blocks = 3;
+
+    // Channelwise dropout probablity.
+    optional float dropout = 4;
+
+    // Layerwise dropout probability.
+    optional float layerdrop = 5 [ default = 0.0 ];
+
+    optional string activation = 7 [ default = "relu" ];
+  }
+
+  // Graph conv encoder, for backwards compatibility, is represented as
+  // this oneof being None, and its parameters are directly inline
+  // in TrainTask instead of being part of this oneof
+  oneof encoder { Transformer transformer = 1; }
+}
+
+message Wandb {
+  // Optional. Name of the project. If not set, something like "train_sl" will
+  // be used.
+  optional string project = 1;
+  // Optional. Explicit name of this run.
+  optional string name = 2;
+  // Optional. Comma separated lists of tags.
+  optional string tags = 3;
+  // Optional. Arbitraty string to describe the experiment.
+  optional string notes = 4;
+  // Optional. Name of the group of this run. Useful for sweeps
+  optional string group = 5;
+  // Optional. Set to false to disable wandb export. E.g., for use in tests.
+  // Note, that in adhoc mode this flag is ignored and wandb is disabled.
+  optional bool enabled = 6 [ default = false ];
+}
+
+message PowerConditioning {
+  // If set, will randomly chose a power and use its orders as input. This
+  // only applies for all-power models. If all_powers_add_*_chances are
+  // enabled, then the conditioning will only applied to non-augmented
+  // training examples.
+  optional float prob = 1;
+  // min number of power's action to condition on (inclusive)
+  optional int32 min_num_power = 2;
+  // max number of power's action to condition on (inclusive)
+  optional int32 max_num_power = 3;
+}
+
+message TrainTask {
+  // No Press dataset params
+  optional NoPressDatasetParams dataset_params = 45;
+
+  // Batch size per GPU.
+  optional int32 batch_size = 4;
+
+  // Learning rate.
+  optional float lr = 5;
+  optional float adam_beta1 = 73 [ default = 0.9 ];
+  optional float adam_beta2 = 74 [ default = 0.99 ];
+
+  // Learning rate decay per epoch.
+  optional float lr_decay = 6;
+
+  // Max gradient norm.
+  optional float clip_grad_norm = 7;
+
+  // Path to load/save the model.
+  optional string checkpoint = 8;
+
+  // Prob[teacher forcing] during training.
+  optional float teacher_force = 10;
+
+  // LSTM dropout pct.
+  optional float lstm_dropout = 11;
+
+  // Encoder dropout pct. IGNORED when using Transformer encoder.
+  optional float encoder_dropout = 12;
+
+  // If set, use a single process.
+  optional bool debug_no_mp = 14;
+
+  // Skip validation / save.
+  optional bool skip_validation = 15;
+
+  // Use extremely simple one-hot attention in decoder
+  optional bool use_simple_alignments = 60;
+
+  // Number of GCN layers in encoder. IGNORED when using Transformer encoder.
+  optional int32 num_encoder_blocks = 20;
+
+  // Number of channels for intermediate encoder layers
+  optional int32 inter_emb_size = 55 [ default = 120 ];
+
+  // Architecture for the encoder (graph vs transformer)
+  optional Encoder encoder = 54;
+
+  // Max number of epochs to train
+  optional int32 num_epochs = 21;
+
+  // Stale. Always enabled.
+  optional bool write_jsonl = 22;
+
+  // Weight of value loss relative to policy loss, between 0 and 1
+  optional float value_loss_weight = 23;
+
+  // Scale factor for initial value decoder weights
+  optional float value_decoder_init_scale = 24;
+
+  // Max gradient norm in value decoder params
+  optional float value_decoder_clip_grad_norm = 25;
+
+  // Activation function within value decoder
+  optional string value_decoder_activation = 75 [ default = "relu" ];
+
+  optional bool value_decoder_use_weighted_pool = 77;
+  optional bool value_decoder_extract_from_encoder = 78;
+
+  // Value head dropout pct.
+  optional float value_dropout = 27;
+
+  // dimension of LSTM
+  optional int32 lstm_size = 33 [ default = 200 ];
+
+  // number of LSTM layers
+  optional int32 lstm_layers = 34 [ default = 1 ];
+
+  // if true, add features to output orders in the model
+  optional bool featurize_output = 35 [ default = false ];
+
+  // if true, add "relational" features to output orders in the model
+  optional bool relfeat_output = 36 [ default = false ];
+
+  optional bool shuffle_locs = 38 [ default = false ];
+
+  optional bool featurize_prev_orders = 39 [ default = false ];
+
+  // Legacy parameter used only for graph encoder.
+  // IGNORED when using Transformer encoder.
+  optional bool residual_linear = 40 [ default = false ];
+
+  // Use a bunch of extra encoder blocks merging prev orders and board state.
+  // Legacy parameter used only for graph encoder.
+  // IGNORED when using Transformer encoder.
+  optional bool merged_gnn = 41 [ default = false ];
+
+  // Optional. If set to a positive value, will skip each residual layer in
+  // encoder with this probability. IGNORED when using Transformer encoder.
+  optional float encoder_layerdrop = 42 [ default = 0.0 ];
+
+  // Optional. If true, will use softmax on top of value head. Otherwise, will
+  // take squares and normalize.
+  optional bool value_softmax = 50 [ default = false ];
+
+  // Optional. If set, will stop the epoch after that many batches. For testing
+  // puproses.
+  optional int32 epoch_max_batches = 51;
+
+  optional bool auto_mixed_precision = 57 [ default = false ];
+
+  // Pad spatial size to the nearest multiple of this. (e.g. 8 would result in
+  // 81 -> 88)
+  optional int32 pad_spatial_size_to_multiple = 58 [ default = 1 ];
+
+  // Random seed
+  optional int32 seed = 59 [ default = 0 ];
+
+  // If set, train model to predict all units for all powers in one sequence
+  optional bool all_powers = 61;
+
+  // If set, will mix-in single power batches with this chances.
+  // chances = 1.0 means that we do 50-50 allpower and singlepower.
+  optional float all_powers_add_single_chances = 81;
+  optional float all_powers_add_double_chances = 82;
+
+  oneof maybe_power_conditioning { PowerConditioning power_conditioning = 83; }
+
+  // If set, the model will support extra input for orders to condition on.
+  optional bool with_order_conditioning = 84;
+
+  // Linear learning rate warmup for this many epochs at the start.
+  optional int32 warmup_epochs = 62;
+
+  // If set, wandb logging will be enabled.
+  optional Wandb wandb = 63;
+
+  // Setting either of these to false will entirely omit the parts of the model
+  // that are no longer necessary, and these parts will not be present in the
+  // checkpoint. Attempting to forward() for the omitted output for a model that
+  // doesn't have it will raise an error.
+  optional bool has_policy = 64 [ default = true ];
+  optional bool has_value = 65 [ default = true ];
+
+  // Controls which version of input encodings we use. See
+  // dipcc/dipcc/cc/encoding.h
+  optional int32 input_version = 66 [ default = 1 ];
+
+  // If true, permute the 7 powers in the input encoding randomly.
+  optional bool training_permute_powers = 67;
+
+  // If true, then the model provides player ratings as input.
+  optional bool use_player_ratings = 68 [ default = false ];
+
+  // Override the power emb size for the policy decoder
+  // Set to 0 to entirely omit.
+  optional int32 power_emb_size = 69 [ default = 60 ];
+
+  // Use new V2 base_strategy_model - drops support for old encoders and some
+  // other outdated parameters.
+  optional bool use_v2_base_strategy_model = 70 [ default = false ];
+
+  // Support the first N of the scoring systems in
+  // fairdiplomacy.models.base_strategy_model.base_strategy_model.Scoring
+  optional int32 num_scoring_systems = 71 [ default = 1 ];
+
+  // If true, then the model uses the year as input.
+  optional bool use_year = 79 [ default = false ];
+
+  // If true, then the model accepts an agent power as input.
+  // This can be used for some RL purposes for training a model
+  // to be asymmetric with respect to agent vs others.
+  optional bool use_agent_power = 80 [ default = false ];
+
+  // Value loss use cross entropy instead of MSE
+  optional bool value_loss_use_cross_entropy = 85 [ default = false ];
+
+  message TransformerDecoder {
+    message Transformer {
+      // Number of attention heads. Must evenly divide inter_emb_size * 2.
+      optional int32 num_heads = 1;
+
+      // Number of intermediate channels for the feed-forward component
+      optional int32 ff_channels = 2;
+
+      // Number of transformer layers in the encoder
+      optional int32 num_blocks = 3;
+
+      // Channelwise dropout probablity.
+      optional float dropout = 4;
+
+      // Layerwise dropout probability.
+      optional float layerdrop = 5 [ default = 0.0 ];
+
+      optional string activation = 7 [ default = "relu" ];
+
+      optional bool extra_normalization = 8;
+    }
+
+    optional int32 inner_dim = 1;
+    optional Transformer transformer = 2;
+
+    optional bool featurize_input = 3;
+    optional bool featurize_output = 4;
+    optional bool share_input_output_features = 7 [ default = true ];
+
+    optional bool explicit_location_input = 5;
+    optional bool positional_encoding = 6;
+  }
+
+  oneof maybe_transformer_decoder {
+    TransformerDecoder transformer_decoder = 72;
+  }
+
+  // DEPRECATED or moved to NoPressDatasetParams
+  optional string data_cache = 500 [ deprecated = true ];
+  optional string metadata_path = 501 [ deprecated = true ];
+  optional float min_rating_percentile = 502 [ deprecated = true ];
+  optional float val_set_pct = 9 [ deprecated = true ];
+  optional int32 max_games = 30 [ default = -1, deprecated = true ];
+  optional bool learnable_A = 16 [ deprecated = true ];
+  optional bool fill_missing_orders = 17 [ default = false, deprecated = true ];
+  optional bool learnable_alignments = 18 [ deprecated = true ];
+  optional bool avg_embedding = 19 [ deprecated = true ];
+  optional bool use_global_pooling = 53 [ deprecated = true ];
+  optional bool graph_decoder = 32 [ default = false, deprecated = true ];
+  optional bool separate_value_encoder = 52 [ deprecated = true ];
+
+  // If specified, requeue on slurm signal
+  optional bool use_default_requeue = 900 [ default = false ];
+  optional Launcher launcher = 1000;
+}
+
+message PressTrainTask {
+  optional TrainTask base_strategy_model_train_params = 1;
+
+  // Parlai agent file
+  optional string parlai_agent_file = 2;
+
+  // Glob of raw message_chunks
+  optional string message_chunks = 3;
+
+  // Combine LSTM embedding size
+  optional int32 combine_emb_size = 4;
+
+  // Combine LSTM Num Layers
+  optional int32 combine_num_layers = 5;
+
+  // Parlai Encoder Model Path
+  optional string encoder_model_path = 6;
+
+  // If enabled, trains a vanilla BaseStrategyModel model
+  optional bool no_dialogue_emb = 7;
+
+  // Launcher
+  optional Launcher launcher = 1000;
+}
+
+// A dummy task to use in tests.
+message TestTask {
+  message SubMessage { optional int32 subscalar = 1 [ default = -1 ]; }
+
+  message ComplexSubmessageWithIncludes {
+    repeated Include includes = 1;
+
+    optional SubMessage sub = 2;
+  }
+
+  enum SomeEnum {
+    ZERO = 0;
+    ONE = 1;
+  };
+
+  optional float scalar = 1 [ default = -1 ];
+  optional float scalar_no_default = 2;
+  optional SubMessage sub = 3;
+  optional SubMessage sub2 = 4;
+
+  optional SomeEnum enum_value = 5 [ default = ZERO ];
+  optional SomeEnum enum_value_no_default = 6;
+
+  oneof oneof_field {
+    int32 oneof_value1 = 7;
+    int32 oneof_value2 = 8;
+    SubMessage oneof_value3 = 9;
+  }
+
+  optional ComplexSubmessageWithIncludes complex_sub = 10;
+
+  map<string, int32> some_map = 11;
+
+  optional bool bool_field_no_default = 12;
+  optional bool bool_field_with_default_false = 13 [ default = false ];
+  optional bool bool_field_with_default_true = 14 [ default = true ];
+
+  oneof maybe_enum { SomeEnum the_enum = 15; }
+
+  optional Launcher launcher = 100;
+}
+
+message ExploitTask {
+  // BaseStrategyModel ckpt to initialize both the blueprint and the training
+  // agents.
+  //
+  // For PG mode only model_path is used. This model is used for both policy and
+  // value.
+  //
+  // For AlphaDip mode both flags are used. If only model_path is given all
+  // losses will be applied to this model. If both are provided, value losses
+  // are applied to value_model_path and policy losses to model_path.
+  //
+  // By default rollout workers will use models specified in the
+  // search_rollout.agent.searchbot.*model_path.
+  // To send trained models to rollouters, use
+  // search_rollout.extra_params.use_trained_{policy,value}.
+  //
+  // Eval workers will use a trained value model iff value loss is on.
+  // Eval workers will use a trained policy model iff policy loss is on.
+  optional string model_path = 1;
+  optional string value_model_path = 22;
+
+  // Optional. If set, will load from this full ckpt (requeue.ckpt file in exp
+  // dir).
+  optional string requeue_ckpt_path = 25;
+
+  // Weight of critic loss in total loss.
+  // For AlphaDip setting this to zero disabled value loss
+  optional float critic_weight = 2 [ default = 1.0 ];
+
+  // Weight of surrogate entropy loss that should push action-level entropy up.
+  optional float sampled_entropy_weight = 10;
+
+  // Optional. If set, weights of the exploit agent will be randomly
+  // initialized.
+  optional bool reset_agent_weights = 8;
+
+  optional Trainer trainer = 6;
+
+  // Optional. If positive, will set random seed for torch on the main process.
+  optional int32 seed = 9 [ default = -1 ];
+
+  optional Wandb wandb = 57;
+
+  // ############### SEARCH ONLY FLAGS
+  // Search mode. Weight of the XE between the netwrork's policy and the search
+  // policy.
+  optional float search_policy_weight = 13;
+  // Apply policy loss every this many batches. Set to < 1.0 to speed up
+  // training.
+  optional float search_policy_update_prob = 16 [ default = 1.0 ];
+  // Apply value loss every this many batches. Set to < 1.0 to train
+  // policy more often than the value.
+  optional float value_update_prob = 85 [ default = 1.0 ];
+  // Search loss will be skipped for actions that have at least this
+  // probability.
+  optional float search_policy_max_prob_cap = 29 [ default = 1.0 ];
+
+  // Must be always true. Using online targets is not supported anymore.
+  optional bool bootstrap_offline_targets = 15;
+
+  // Num gpus to use. Search only.
+  optional int32 num_train_gpus = 18 [ default = 1 ];
+
+  message SearchEvTarget {
+    optional float temperature = 1;
+    optional bool use_softmax = 2 [ default = true ];
+  }
+
+  oneof maybe_search_ev_loss { SearchEvTarget search_ev_loss = 21; }
+
+  // Use a faster method of multiGPU training with processes instead of threads
+  optional bool use_distributed_data_parallel = 26 [ default = false ];
+
+  // If true, permute the 7 powers in the input encoding randomly.
+  // Only works if the underlying model is input version >= 2
+  optional bool training_permute_powers = 27;
+
+  // For all-power modes we can set use this to augment the policy.
+  oneof maybe_power_conditioning { PowerConditioning power_conditioning = 83; }
+  optional float single_power_chances = 84;
+  optional float six_power_chances = 86;
+
+  // ############### PG ONLY FLAGS
+  // Reward discounting.
+  optional float discounting = 7 [ default = 1.0 ];
+  // Weight of entropy loss in total loss.
+  optional float entropy_weight = 3 [ default = 0.0 ];
+
+  message Optimization {
+    // Deprecated. Use LR within optimizer.
+    optional float lr = 1;
+    // Optional (but highly recommended). Gradient clipping.
+    optional float grad_clip = 2;
+
+    // Optional. Warmup LR from zero to normal linearly.
+    optional int32 warmup_epochs = 3;
+
+    // Optional. Set lr to 0 by this number of epochs. Cannot be less than
+    // number of epochs.
+    optional int32 cosine_decay_epochs = 6;
+
+    // Optional. Multiply LR by factor every certain number of epochs
+    optional int32 step_decay_epochs = 7;
+    optional float step_decay_factor = 8;
+
+    message WarmupDecay {
+      optional int32 warmup_epochs = 1;
+      optional int32 decay_epochs = 2;
+      optional float final_decay = 3 [ default = 0.1 ];
+    }
+
+    oneof maybe_warmup_decay { WarmupDecay warmup_decay = 9; }
+
+    message AdamOptimizer {
+      optional float lr = 1;
+      // If set, will use AdamW.
+      optional float weight_decay = 2;
+    }
+
+    message SgdOptimizer {
+      optional float lr = 1;
+      optional float momentum = 2;
+      optional float weight_decay = 3;
+    }
+
+    oneof optimizer {
+      AdamOptimizer adam = 4;
+      SgdOptimizer sgd = 5;
+    };
+  }
+  optional Optimization optimizer = 4;
+
+  // Only for AlphaDip.
+  oneof maybe_value_optimizer { Optimization value_optimizer = 200; }
+
+  message Rollout {
+    // Required. Max number of steps to do in the rollout.
+    optional int32 rollout_max_length = 1;
+
+    // Optional. How many parallel games to batch within single rollout.
+    optional int32 rollout_batch_size = 2 [ default = 1 ];
+
+    // Optional. How many rollout proccesses to run. If zero or negative, will
+    // run rollouts in the main process.
+    optional int32 num_rollout_processes = 4 [ default = 1 ];
+
+    // Optional. If > 0, will save games with this stride.
+    optional int32 dump_games_every = 5 [ default = 0 ];
+
+    // Optional. Max batch size in postman inference processes.
+    optional int32 inference_batch_size = 6;
+
+    // Optional. Wait at least this number of seconds before loading new model
+    // in the inference worker. By default check before every forward.
+    optional int32 inference_ckpt_sync_every = 14;
+
+    // Required. The size of the produces batches. That what the training loop
+    // will receive.
+    optional int32 batch_size = 7;
+
+    // Optional. How much adjancent batches overleave. Note that default value
+    // (1) means that each action frame will be used exactly once as last item
+    // in a batch is remove in impala.
+    optional int32 batch_interleave_size = 8 [ default = 1 ];
+
+    // Optional. If set, the batches will concatenate rollouts until batch_size
+    // is reached, instead of following it exactly.
+    optional bool do_not_split_rollouts = 9;
+
+    optional bool single_rollout_gpu = 11;
+    optional int32 server_procs_per_gpu = 12 [ default = 1 ];
+
+    message Reward {
+      // Required. Name of the score metric from
+      // fairdiplomacy.utils.game_scoring.
+      optional string score_name = 1;
+
+      // Optional. Penalty for each move to encourage shorter games.
+      optional float delay_penalty = 2;
+
+      // Optional. If set, then the reward will be a difference between the
+      // score before the action and after the action.
+      optional bool differential_reward = 3;
+
+      // Optional. Hacky way to hardcore alliances.
+      // 0 -> no alliances
+      // 1 -> FRA, ENG, GER vs all.
+      // 2 -> FRA, ENG, GER, IT vs all.
+      // 3 -> FRA, ENG, RUS vs all.
+      // 4 -> FRA vs all.
+      optional int32 alliance_type = 4;
+    }
+
+    // Required. How to compute rewards.
+    optional Reward reward = 10;
+
+    // Optional. Whether do self plat instead of exploitability.
+    optional bool selfplay = 13;
+
+    // Required in selfplay. Number of rollout proccess to do eval rollouts
+    // against the supervised model. These rollouts are ingored for training.
+    // These workers are subtracted from num_rollout_processes.
+    optional int32 num_eval_rollout_processes = 15;
+
+    // Required. Temperature for the oponent agent.
+    optional float blueprint_temperature = 16;
+
+    // Optional. If set, will override global model_path.
+    optional string blueprint_model_path = 20;
+
+    // Optional. If set, will stop rollout once the explout agent/agents is out.
+    optional bool fast_finish = 17;
+
+    // Optional. If provided, rollouts and evals with start from these games.
+    // The file is expected to contain pathes to game.jsons one per line.
+    // Additionally, one can specify a phase after game path:
+    //    <game_json_path> [ ":" <phase> ]
+    // Alternatively, one can provide a path to game.json file here to run on a
+    // single game with optional phase.
+    optional string initial_games_index_file = 18;
+
+    // Optional. If set, will use only this number of cores. Last cores are
+    // reserved assuming machine has 80 cores.
+    optional int32 num_cores_to_reserve = 19;
+  }
+
+  optional Rollout rollout = 5;
+
+  message SearchRollout {
+    // Required. Params of the CFR agent. To simplify includes allowing
+    // arbitrary agent here, but code will only accept SearchBot agent.
+    optional Agent agent = 1;
+
+    oneof maybe_eval_agent {
+      // A version of the agent to use for h2h, test_sit, but not self-play
+      // games.
+      Agent eval_agent = 2;
+    }
+
+    // // Required. Max number of steps to do in the rollout.
+    // optional int32 rollout_max_length = 2;
+
+    // Optional. How many rollout proccesses to run per GPU. If zero or
+    // negative, will run single rollout process.
+    optional int32 num_workers_per_gpu = 4 [ default = 1 ];
+
+    // Required. How many consequetive phases are batched together. This affects
+    // batch (num phases in batch = chunk_length * batch_size) and how
+    // frequent workers send updates to the trainer (once chunk_length phases
+    // are collected).
+    optional int32 chunk_length = 6;
+
+    // Required. The size of the produces batches. This is multipliplied by
+    // chunk_length, see above.
+    optional int32 batch_size = 7;
+
+    // Optional. If set, the batches will concatenate rollouts until batch_size
+    // is reached, instead of following it exactly.
+    optional bool do_not_split_rollouts = 9;
+
+    optional int32 server_procs_per_gpu = 12 [ default = 1 ];
+
+    // Required in selfplay. Number of rollout proccess to do eval rollouts
+    // against the supervised model. These rollouts are ingored for training.
+    // These workers are subtracted from num_rollout_processes.
+    // optional int32 num_eval_rollout_processes = 15;
+
+    // Optional. If provided, rollouts and evals with start from these games.
+    // The file is expected to contain pathes to game.jsons one per line.
+    optional string initial_games_index_file = 18;
+
+    // Optional. If set, will use only this number of cores. Last cores are
+    // reserved assuming machine has 80 cores.
+    optional int32 num_cores_to_reserve = 19;
+
+    // Optional. How verbose logging for rollout processes.
+    // 0 - no logging
+    // 1 - process 0 writes INFO and everyone else writes WARNINGS
+    // 2 - everyone writes INFO
+    optional int32 verbosity = 20 [ default = 1 ];
+
+    message ExtraRolloutParams {
+      // Optional. If positive will sample from all plausible actions instead of
+      // doing CFR with this probability.
+      optional float explore_eps = 2 [ default = 0.0 ];
+
+      // Optional. Custom explore constants for first 2 phases in the game.
+      optional float explore_s1901m_eps = 14 [ default = 0.0 ];
+      optional float explore_f1901m_eps = 15 [ default = 0.0 ];
+
+      // Optional. Put each rollout this many times to a queue. For debugging.
+      optional int32 fake_gen = 3 [ default = 1 ];
+
+      // Optional. If set, will decided whether to explore for each agent
+      // independently.
+      optional bool independent_explore = 4;
+
+      // Optional. If set, will choose explore step first and then an agent that
+      // doesn't deviate at this step, and deviate for the others.
+      optional bool explore_all_but_one = 9;
+
+      // Optional. If set, will not play after this year.
+      optional int32 max_year = 5;
+
+      // Optional. If set, will set max_year on rollour workers randomly from
+      // [1902, max_year].
+      optional bool randomize_max_year = 6;
+
+      // Optional. Simplex-discounting factor.
+      optional float discounting = 8 [ default = 1.0 ];
+
+      // Optional. If set, will use CFR-based EVs of the next state as targets.
+      optional bool use_ev_targets = 19;
+
+      // Optional. If set, will collect CFR policies and send to the trainer.
+      // This flag should be set programatically by other flags.
+      optional bool collect_search_policies = 10;
+
+      // Optional. If set, will collect CFR policies and send to the trainer.
+      // This flag should be set programatically by other flags.
+      optional bool collect_search_evs = 18;
+
+      // Optional. If true, will use average utilities from CFR run. If false,
+      // will recompute EVs. False only works for 2p when average policy is
+      // used.
+      optional bool use_cfr_evs = 23;
+
+      // Optional. If set, will use the model under training as a policy, i.e.,
+      // to generate plausible actions.
+      optional bool use_trained_policy = 11;
+
+      // Optional. If set, will use the model under training for value
+      // estimation.
+      optional bool use_trained_value = 21 [ default = true ];
+
+      // Optional. If set, use completely random policy (uniform sampling) for
+      // plausible orders.
+      optional bool random_policy = 13;
+
+      // Optional. Run DoubleOracle in this percentage of games. Only value if
+      // `do` is provided. Unless allow_policy_tragets_without_do is true.
+      optional float run_do_prob = 17 [ default = 1.0 ];
+
+      // Optional. If set, will use as training targets for policy steps with
+      // and without DO.
+      optional bool allow_policy_tragets_without_do = 26;
+
+      oneof maybe_do { DoubleOracleExploration do = 16; }
+
+      // Optional. If set, will prune this much from the end of the
+      // episode for games that don't finish.
+      // This option should probably be considered deprecated
+      // since using it to control the effective rollout length of
+      // the training distribution will create weird correlationns with
+      // whether the game ended or not. See instead
+      // {min,max}_max_episode_movement_phases and max_training_episode_length.
+      optional int32 min_undone_episode_length = 27 [ default = 0 ];
+
+      message PlayBlueprint {
+        optional float temperature = 1 [ default = 1.0 ];
+        optional float top_p = 2 [ default = 1.0 ];
+      }
+      // Optional. If set, don't do search, just play blueprint.
+      oneof maybe_always_play_blueprint {
+        PlayBlueprint always_play_blueprint = 28;
+      }
+
+      // Optional. If set, truncate any self-play episode after this many
+      // turns if it hasn't already finished. Value net will be used to score
+      // the final position.
+      optional int32 max_episode_length = 31;
+
+      // For game json paths, randomize the starting phase within the game
+      optional bool sample_game_json_phases = 32;
+
+      // Value of has_press flag for both the training and quering.
+      optional bool default_has_press = 40 [ default = false ];
+
+      // Randomly half of the time set has_press to be true for the agent.
+      optional bool randomize_has_press = 33;
+
+      // Randomize sos vs dss scoring
+      optional bool randomize_sosdss = 34;
+
+      // If specified, each epsisode randomly draw a number K in the range
+      // [min_max_episode_movement_phases, max_max_episode_movement_phases]
+      // inclusive and stop as soon the K+1th movement phase is reached.
+      // (So episode will have at most K search policies for movement phases).
+      optional int32 min_max_episode_movement_phases = 35;
+      optional int32 max_max_episode_movement_phases = 36;
+
+      // If specified, only train on the first this many phases of each episode.
+      // If not use_ev_targets, will still use the untruncated epsiode value
+      // as value target.
+      optional int32 max_training_episode_length = 37;
+
+      // If specified, sample an agent power for each game, pass the agent
+      // power through to the model and record x_agent_power in the
+      // base_strategy_model inputs for the training data.
+      optional bool use_random_agent_power = 38;
+
+      // If set, will randomly choose between INDEPENDENT_PIKL and
+      // JOINT_CONDITIONAL sampling schemes for TheBestAgent.
+      optional bool randomize_best_agent_sampling_type = 41;
+
+      // Usualy the policyt size, i.e., num action per power, is limited by
+      // n_plausible_size. However, in some cases the actual policy returned by
+      // the agent could be larger. E.g., if we use an agent with a joint
+      // policy. In this case we can set this parameter to keep more (or less)
+      // actions then n_plausible_actions.
+      // Note, that setting this to lower than n_plausible_actions will truncate
+      // policies for independent agents.
+      optional int32 max_policy_size = 42;
+    }
+
+    // Will be passed to `yield_rollouts`.
+    optional ExtraRolloutParams extra_params = 21;
+
+    // If set, no training is done, only data generation is benchmarked.
+    optional bool benchmark_only = 22;
+
+    //  Disable all h2h and test situation evals.
+    optional bool local_debug = 30;
+
+    message Buffer {
+      // Required. Buffer size in chunks.
+      optional int32 capacity = 1;
+
+      optional int32 prefetch = 4;
+
+      // Optional. If set, will pre-load buffer from this path on save.
+      optional string load_path = 2;
+      // Optinal. If set, will save buffer after this many examples added.
+      // Ignored if load_path is used.
+      optional int32 save_at = 3;
+
+      // Optional. If set, will shuffle elements within chunks.
+      optional bool shuffle = 5;
+    }
+
+    // Optional. If set, will throttle training if train_sampled/gen_sammple
+    // above this value.
+    optional float enforce_train_gen_ratio = 25 [ default = -1 ];
+
+    optional Buffer buffer = 23;
+
+    message TestSituationEval { optional bool do_eval = 1; }
+
+    optional TestSituationEval test_situation_eval = 24;
+
+    message H2HEval {
+      optional Agent agent_six = 1;
+      optional string tag = 2;
+      // Optional. If provided, redefines global initial_games_index_file.
+      optional string initial_games_index_file = 3;
+
+      // These flags will be set automatically.
+      // use_trained_{policy,value} is set to true iff we apply loss on
+      // {policy,value}. The trainer nows which losses are used and will set
+      // these variables correspndingly.
+      optional bool use_trained_policy = 4;
+      optional bool use_trained_value = 5;
+
+      // Set programatically. Disables any exploitation in CFR agent. Used so
+      // that we have the ability to train value and policy knowing the
+      // opponent's strategy, but then at inference time still compute a proper
+      // equilibrium.
+      optional bool disable_exploit = 6;
+
+      // If true, the agent under training will control 6 agents.
+      optional bool play_as_six = 7;
+
+      optional int32 min_games_for_stats = 8 [ default = 50 ];
+    }
+
+    // Optional. Run h2h eval against 6 other agents.
+    optional H2HEval h2h_eval_0 = 26;
+    optional H2HEval h2h_eval_1 = 29;
+
+    // Optional. If positive, automatically draw if no center ownership changes
+    // in this number of years.
+    optional int32 draw_on_stalemate_years = 27 [ default = -1 ];
+
+    optional int32 warmup_batches = 28 [ default = 1 ];
+
+    // If set, will apply linear averaging to the checkpoints sent to the
+    // rollout workers.
+    optional bool linear_average_sync_policy_checkpoints = 31;
+  }
+
+  // Rollout params for ReSearch mode.
+  optional SearchRollout search_rollout = 11;
+
+  message Trainer {
+    // Optional. By default = infinite.
+    optional int32 max_epochs = 1;
+    // Required. Number of updates per epoch.
+    optional int32 epoch_size = 2;
+    // Optional. Save checkpoint every so many epochs.
+    optional int32 save_checkpoint_every = 3;
+    // Optional. Communicate current ckpt to inference workers every so many
+    // iterations.
+    optional int32 save_sync_checkpoint_every = 4 [ default = 1 ];
+    // Optional.  If separate value and policy model is used, this could
+    // redefine frequence of sync for the value model.  By default the same as
+    // save_sync_checkpoint_every.
+    optional int32 save_sync_value_checkpoint_every = 10;
+    // Optional. Debugging option. Stop updating model after this number of
+    // updates.
+    optional int32 max_updates = 5 [ default = 0 ];
+    // Optional. If set, will train a model being in eval mode.
+    optional bool train_as_eval = 6;
+    optional bool train_encoder_as_eval = 7;
+    optional bool train_decoder_as_eval = 8;
+    // Run everything in eval mode except for batch norm modules. Essentially it
+    // puts only dropout to eval mode.
+    optional bool train_as_eval_but_batchnorm = 9;
+  }
+
+  // Arbitraty comment. Could use to make a "re" run for the same config and
+  // changed code.
+  optional string comment = 999;
+  optional Launcher launcher = 1000;
+}
+
+message BuildDbCacheTask {
+  // Dataset Params
+  optional NoPressDatasetParams dataset_params = 1;
+
+  // Required. Glob pattern to game.json files
+  optional string glob = 2;
+
+  // Required. Path to save db cache
+  optional string out_path = 3;
+
+  // Optional. If specified, use this agent's orders instead of the orders in
+  // the game.json
+  optional Agent cf_agent = 4;
+
+  // Optional, only valid with cf_agent. If > 1, sample cf_agent multiple
+  // times, saving each as a separate row in the db.
+  optional uint32 n_cf_agent_samples = 5 [ default = 1 ];
+
+  // Percentage of games to use as val set.
+  optional float val_set_pct = 6 [ default = 0.01 ];
+
+  optional Launcher launcher = 100;
+}
+
+message PressDatasetParams {
+  optional NoPressDatasetParams no_press_params = 1;
+
+  // Parlai agent file
+  optional string parlai_agent_file = 2;
+
+  // Glob of raw message_chunks
+  optional string message_chunks = 3;
+}
+
+message BuildPressDbCacheTask {
+  optional PressDatasetParams press_params = 1;
+
+  // DEPRECATED use press_params.limit_n_games
+  optional int32 max_games = 4 [ default = -1, deprecated = true ];
+
+  // Percentage of games to use as val set.
+  optional float val_set_pct = 5 [ default = 0.01 ];
+}
+
+// Root config to compare agents.
+message SituationCheckTask {
+  optional Agent agent = 1;
+  optional string situation_proto = 2;
+  optional int32 seed = 3 [ default = -1 ];
+  optional string selection = 4;
+  // Optional. If single_game is set, then the game is used instead of
+  // situation_proto.
+  optional string single_game = 5;
+  // Optional. Only applies to the case when single_game is set.
+  optional string single_phase = 6;
+  // Optional. Add extra orders as plausible. Symbols in ["()] are ignored to
+  // simplify re-using orders printed in the terminal.
+  // Format: <power> ":" <order> ["," <order> [...] ] [";" <power> ":" ...]
+  optional string extra_plausible_orders = 7;
+  // Optional. Number of samples to take if agent does not implement
+  // get_all_power_prob_distributions
+  optional int32 n_samples = 8;
+  // Optional. Only applies to the case when single_game is set.
+  optional string single_power = 9;
+
+  optional int64 single_timestamp = 11 [ default = -1 ];
+
+  optional Launcher launcher = 100;
+}
+
+message BenchmarkAgent {
+  optional Agent agent = 1;
+  // Game json to test on. If not set, initial state is used.
+  optional string game_json = 2;
+  // If not set, will use the last phase.
+  optional string phase = 5;
+  // Required. The power to play.
+  optional string power = 6;
+  // If true, will generate message. Otherwise, will generate orders.
+  optional bool generate_message = 7;
+  // If true, will generate this many messages without resetting the state.
+  optional int32 num_messages = 8 [ default = 2 ];
+  optional int32 seed = 3 [ default = 0 ];
+  optional int32 repeats = 4;
+
+  optional Launcher launcher = 100;
+}
+
+message PlayWebdipTask {
+  optional Agent agent = 1;
+  // comma-separated API keys
+  optional string api_key = 2;
+  // comma-separated game IDs
+  optional string game_id = 3 [ default = "" ];
+  optional string check_phase = 4;
+  optional string json_out = 5;
+  optional bool force = 6 [ default = false ];
+  optional string force_power = 7 [ default = "ENGLAND" ];
+  optional string webdip_url = 8 [ default = "https://webdiplomacy.net" ];
+  // Optional. If set, will wait this number of seconds before sending the
+  // order.
+  optional int32 present_timeout = 9;
+
+  // Optional. Play only this variant of the game. 1 is classic; 15 is FVA. All
+  // games of other types will be ignored by the bot.
+  optional int32 variant_id = 10 [ default = 1 ];
+
+  // Optional. Set to True to allow bot to chat.
+  optional bool allow_dialogue = 11;
+
+  // Optional. If set, logs and game.json for each game will be saved at the
+  // folder.
+  optional string log_dir = 12 [ default = "./webdip_logs" ];
+  // Specify this path to indicate where the agent should save its persistent
+  // state. The substrings %(user)s and %(api_key)s will be substituted.
+  // If not specified or if equal to "PER_API_KEY", will use a default
+  // per-api-key path based on the log directory.
+  // When game_id is also specified, will *require* that this field is
+  // specified, to avoid mistakes of starting multiple webdip_api processes for
+  // different games for the same user and accidentally sharing the same
+  // checkpoint path.
+  optional string checkpoint_path = 18;
+
+  // Optional. Multiply all sleep times by this factor (for debugging).
+  optional float sleep_multiplier = 13 [ default = 1.0 ];
+
+  // Optional. If set and an exception regarding bad response from the server is
+  // thrown, then will do this many retries. Set to -1 to to infinite number of
+  // retries.
+  optional int32 retry_exception_attempts = 14;
+  // Optional. Specifies if we should send messages immediately, or require
+  // manual approval before sending messages.
+  optional bool require_message_approval = 15 [ default = true ];
+  // Optional. Use to disable testing mode.
+  optional bool ready_immediately = 16 [ default = false ];
+
+  // Optional. If this is set, the bot will toggle its vote for draws to be
+  // yes at the start of every new phase where it is the case that for the last
+  // this many years, no supply center has changed control anywhere on the map.
+  optional int32 draw_on_stalemate_years = 17;
+
+  // comma-separated account name correspnding to api_key field
+  optional string account_name = 19;
+
+  // Defaukt behavior is to discard messages if the phase changed or a new
+  // message was received. If this flag is set, we only discard messages if the
+  // phase changed or a message from a recipient of the message we wanted to
+  // send is recieved.
+  optional bool only_bump_msg_reviews_for_same_power = 20 [ default = false ];
+
+  // If this flag is set, we will only send message to this recipient. If this
+  // is equal to bot's power, then the bot will only send messages, but not
+  // talk.
+  optional string recipient = 21;
+
+  optional int32 reuse_stale_pseudo_after_n_seconds = 22 [ default = -1 ];
+
+  // If specified, connect only to this game. May use wildcards.
+  optional string game_name = 24;
+
+  // If specified, requeue on slurm signal
+  optional bool use_default_requeue = 99 [ default = false ];
+  optional Launcher launcher = 100;
+
+  optional bool is_backup = 101 [ default = false ];
+
+  // DEPRECATED
+  optional string reset_bad_games = 23 [ deprecated = true ];
+}
+
+message ComputeXPowerStatisticsTask {
+  // Directory containing game.json files to evaluate
+  required string game_dir = 1;
+  // Max # of games to evaluate
+  optional int32 max_games = 2;
+  // Stop computing at this year (to avoid endless supports for draw
+  optional string max_year = 3 [ default = "1920" ];
+
+  // --- filtering ---
+  // Path to metadata file for games, allowing for filtering
+  optional string metadata_path = 4;
+  // Lambda function to filter games based on metadata, e.g. `lambda g:
+  // g["press_type"]=="Regular"`
+  optional string metadata_filter = 5;
+  // Dataset cache to select eval game IDs
+  optional string dataset_for_eval = 6;
+
+  // --- counterfactual agent ---
+  // If specified, looks at xpower supports from this agent in the situations
+  // from the dataset games. e.g. you can ask "what % of BaseStrategyModel's
+  // supports would be effective when playing in observed games. n.b. be careful
+  // about testing on BaseStrategyModel's training set!
+  optional Agent cf_agent = 7;
+
+  // -- perf --
+  optional int32 num_jobs = 8 [ default = 40 ];
+}
+
+// Compute throughput and latency numbers for the no-press model
+message ProfileModelTask {
+  optional string model_path = 1;
+
+  // Run the policy decoder? If false, only does the value decoder.
+  optional bool need_policy = 2 [ default = true ];
+
+  // Use built-in torch auto mixed precision to run certain ops in FP16?
+  // Make sure you are on a Volta or other GPU that has fast FP16 support.
+  optional bool auto_mixed_precision = 3 [ default = false ];
+
+  // Run everything in the model in FP16?
+  // Make sure you are on a Volta or other GPU that has fast FP16 support.
+  optional bool half_precision = 4 [ default = false ];
+
+  optional Launcher launcher = 100;
+}
+
+// The root config. Every top-level prototxt must be a message of this type.
+// User's code will recieve a specific task config after all includes and
+// redefines are resolved.
+message MetaCfg {
+  repeated Include includes = 1;
+  oneof task {
+    CompareAgentsTask compare_agents = 101;
+    TrainTask train = 102;
+    ExploitTask exploit = 104;
+    BuildDbCacheTask build_db_cache = 105;
+    SituationCheckTask situation_check = 106;
+    BenchmarkAgent benchmark_agent = 107;
+    PlayWebdipTask play_webdip = 108;
+    BuildPressDbCacheTask build_press_db_cache = 109;
+    PressTrainTask press_train = 110;
+    ProfileModelTask profile_model = 111;
+    ComputeXPowerStatisticsTask compute_xpower_statistics = 112;
+    CompareAgentPopulationTask compare_agent_population = 114;
+
+    // Dummy task to test heyhi.
+    TestTask test = 999;
+  }
+}

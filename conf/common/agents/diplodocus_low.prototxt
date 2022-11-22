@@ -1,0 +1,40 @@
+includes {path: "searchbot/qre_rol3_p30.prototxt"; mount: "bqre1p.base_searchbot_cfg"; }
+includes {path: "do/do_7p_it21_act4k_local_base_strategy_model20111109"; mount: "bqre1p.base_searchbot_cfg.order_aug.do"}
+bqre1p {
+    base_searchbot_cfg {
+      model_path: "models/diplodocus_low_rl_policy.ckpt"
+      value_model_path: "models/diplodocus_low_value_function.ckpt"
+      rollout_model_path: "models/no_press_human_imitation_policy.ckpt"
+
+      max_seconds: 280
+      rollouts_cfg {
+        max_rollout_length: 1
+        year_spring_prob_of_ending: "1901,0;1909,0.2;1914,0.4"
+      }
+
+      order_aug {
+        do {
+          max_seconds: 120
+          n_rollouts: 512
+        }
+      }
+
+      n_rollouts: 2048
+    }
+
+    do_bayesian_updates: false
+    num_player_types: 4
+    pow_lambdas_1901_spring: 0.5
+
+    player_types {
+      log_uniform {
+        min_lambda: 1e-4
+        max_lambda: 1e-1
+        policies {
+          name: "bp"
+          model_path: "models/no_press_human_imitation_policy.ckpt"
+        }
+      }
+    }
+    agent_type: 1
+}

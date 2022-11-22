@@ -1,0 +1,9 @@
+slurm {
+  num_gpus: 1
+  cpus_per_gpu: 10
+  partition: "Diplomacy"
+  hours: 72
+  mem_per_gpu: 60
+  volta32: false
+  single_task_per_node: false
+}

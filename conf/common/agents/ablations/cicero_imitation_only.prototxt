@@ -1,0 +1,7 @@
+includes { path: "conf/common/agents/orders/20220305_allorderindependentrollout.prototxt"; mount: "parlai_full_press.model_orders" }
+includes { path: "conf/common/agents/dialogue/20220729_dialogue_rolloutevery_replythresh_firstmessagethresh_5m.prototxt"; mount: "parlai_full_press.dialogue" }
+
+# Uncomment to add nonsense ensemble back in.
+# includes { path: "conf/common/agents/dialogue/nonsense_classifiers/20220728_ensemble_nonsense_classifier_speedpress_trial2_90recall.prototxt"; mount: "parlai_full_press.dialogue.ensemble_nonsense_classifier" }
+
+parlai_full_press { }

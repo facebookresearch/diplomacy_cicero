@@ -1,0 +1,18 @@
+# Training config for an old in-development model, preserved only since
+# some unit tests use this config.
+includes {path: "../searchbot/qre_rol0_p30"; mount: "bqre1p.base_searchbot_cfg"; }
+bqre1p {
+    base_searchbot_cfg {
+      model_path: "MODEL_PATH.checkpoint"
+    }
+
+    do_bayesian_updates: True
+    num_player_types: 10
+    player_types {
+      log_uniform {
+        min_lambda: 3e-06
+        max_lambda: 5.9049e-02
+      }
+    }
+    agent_type: 1
+}

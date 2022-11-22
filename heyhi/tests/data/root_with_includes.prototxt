@@ -1,0 +1,2 @@
+includes { mount: "sub2", path: "redefine_subscalar_22" }
+test {}

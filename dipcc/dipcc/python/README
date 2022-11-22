@@ -1,0 +1,1 @@
+compile.sh puts the .so file in this dir, and this dir is added to the PYTHONPATH by pip install -e
