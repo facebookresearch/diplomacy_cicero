@@ -80,7 +80,7 @@ Please email <diplomacyteam@meta.com> to request the password. Then run `bash bi
 
 ### Accessing Cicero's experiment games
 
-JSON data for games that Cicero played in are located in `data/cicero_redacted_games`. Only conversations with players who have consented to having their dialogue released are included. Please refer to the (separately-licensed) [fairdiplomacy_external]((fairdiplomacy_external)) subdirectory for details on HTML visualizations.
+JSON data for games that Cicero played in are located in `data/cicero_redacted_games`. Only conversations with players who have consented to having their dialogue released are included. Please refer to the (separately-licensed) [fairdiplomacy_external](fairdiplomacy_external) subdirectory for details on HTML visualizations.
 
 ### Getting started
 
