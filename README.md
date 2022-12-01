@@ -197,4 +197,4 @@ SOFTWARE.
 
 ## License for Model Weights
 
-We are releasing model weights under a separate license: [CC-BY-NC (version 4.0)](https://creativecommons.org/licenses/by-nc/4.0/legalcode). This license is copied into this repository for convenience: [LICENSE_FOR_MODEL_WEIGHTS.md](LICENSE_FOR_MODEL_WEIGHTS.md).
+We are releasing model weights under a separate license: [CC-BY-NC (version 4.0)](https://creativecommons.org/licenses/by-nc/4.0/legalcode). This license is copied into this repository for convenience: [LICENSE_FOR_MODEL_WEIGHTS.txt](LICENSE_FOR_MODEL_WEIGHTS.txt).
