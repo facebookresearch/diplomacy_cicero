@@ -42,6 +42,7 @@ fi
 # Downloading models_encrypted
 ####
 mkdir $INDIR
+mkdir $INDIR/nonsense_ensemble
 FILENAMES=$BINDIR/s3_filenames.txt
 
 cat $FILENAMES | while read FILE
