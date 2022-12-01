@@ -76,7 +76,7 @@ After each pull it's recommended to run `make` to re-compile internal C++ and pr
 
 ### Downloading model files
 
-Please email <diplomacyteam@meta.com> to request the password. Then run `bash bin/download_model_files.sh <PASSWORD>`. This will download and decrypt all relevant model files into `./models`. This might take awhile.
+Please email <diplomacyteam@meta.com> to request the password. Then run `bash bin/download_model_files.sh <PASSWORD>`. This will download and decrypt all relevant model files into `./models`. This might take awhile. Please note the model files have their own license separate from the code in this repository. More details on this [can be found below](#license-for-model-weights).
 
 ### Accessing Cicero's experiment games
 
@@ -167,7 +167,7 @@ To view the durations of all tests, run with the flag `--durations=0`, e.g.:
 pytest --durations=0 unit_tests/
 ```
 
-## License
+## License for Code
 The following license, which is also available [here](LICENSE.md), covers the content in this repo *except* for the [fairdiplomacy_external](fairdiplomacy_external) directory. The content of fairdiplomacy_external is separately licenced under a version of the AGPL, see the license file within that directory for details.
 
 ```
@@ -194,3 +194,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## License for Model Weights
+
+We are releasing model weights under a separate license: [CC-BY-NC (version 4.0)](https://creativecommons.org/licenses/by-nc/4.0/legalcode). This license is copied into this repository for convenience: [LICENSE_FOR_MODEL_WEIGHTS.md](LICENSE_FOR_MODEL_WEIGHTS.md).
