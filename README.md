@@ -118,7 +118,7 @@ See [here](fairdiplomacy_external) for some separately-licensed code for renderi
 ### Supervised training of baseline models
 Supervised training and/or behavioral cloning for various dialogue-conditional models as well as pre-RL baseline dialogue-free models involves some of the scripts in [parlai_diplomacy](parlai_diplomacy) via the ParlAI framework, and on the dialogue-free side, some of the configs [conf/c02_sup_train](conf/c02_sup_train) and [train_sl.py](fairdiplomacy/models/base_strategy_model/train_sl.py). However the dataset of human games and/or dialogue is NOT available here, so the relevant code and configs are likely to be of limited use. They are provided here mostly as documentation for posterity.
 
-However, as mentioned above pre-trained models are available, and with sufficient compute power, re-running the RL on top of these pre-trained models is also possible without any exteral game data.
+However, as mentioned above pre-trained models are available, and with sufficient compute power, re-running the RL on top of these pre-trained models is also possible without any external game data.
 
 
 ### Pre-commit hooks
