@@ -1277,7 +1277,7 @@ message PlayWebdipTask {
   // Defaukt behavior is to discard messages if the phase changed or a new
   // message was received. If this flag is set, we only discard messages if the
   // phase changed or a message from a recipient of the message we wanted to
-  // send is recieved.
+  // send is received.
   optional bool only_bump_msg_reviews_for_same_power = 20 [ default = false ];
 
   // If this flag is set, we will only send message to this recipient. If this
@@ -1347,7 +1347,7 @@ message ProfileModelTask {
 }
 
 // The root config. Every top-level prototxt must be a message of this type.
-// User's code will recieve a specific task config after all includes and
+// User's code will receive a specific task config after all includes and
 // redefines are resolved.
 message MetaCfg {
   repeated Include includes = 1;
