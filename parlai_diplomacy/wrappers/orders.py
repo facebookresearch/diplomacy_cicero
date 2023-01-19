@@ -1107,7 +1107,8 @@ class ParlAIAllOrderIndependentRolloutWrapper(BaseOrderWrapper):
         A dict of `power` -> `input sequence for model`
         """
         power_to_seq = self._get_input_dict_for_speaker(game, view_of_power)
-        assert target_power is not None
+        if target_power is None:
+            target_power = view_of_power
         assert target_power in power_to_seq
 
         return power_to_seq[target_power]
