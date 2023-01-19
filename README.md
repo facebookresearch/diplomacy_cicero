@@ -94,11 +94,11 @@ A core abstraction is an `Agent`, which is specified by an `Agent` config whose 
 
 To simulate 1v6 games between a pair of agents, you can run the `compare_agents` task. For example, to play one Cicero agent as Turkey against six full-press imitation agents, you can run
 
-`python run.py --adhoc --cfg conf/c01_ag_cmp/cmp.prototxt Iagent_one=agents/bqre1p_parlai_20220819_cicero_2.prototxt Iagent_six=agents/ablations/cicero_imitation_only.prototxt power_one=TURKEY`
+`python run.py --adhoc --cfg conf/c01_ag_cmp/cmp.prototxt Iagent_one=agents/cicero.prototxt Iagent_six=agents/ablations/cicero_imitation_only.prototxt power_one=TURKEY`
 
 If you don't have sufficient memory to load two agents, you can load a single agent in self-play with the `use_shard_agent=1` flag:
 
-`python run.py --adhoc --cfg conf/c01_ag_cmp/cmp.prototxt Iagent_one=agents/bqre1p_parlai_20220819_cicero_2.prototxt use_shared_agent=1 power_one=TURKEY`
+`python run.py --adhoc --cfg conf/c01_ag_cmp/cmp.prototxt Iagent_one=agents/cicero.prototxt use_shared_agent=1 power_one=TURKEY`
 
 ### Training models in RL
 
