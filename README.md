@@ -31,7 +31,7 @@ You can play the game online on [webDiplomacy](https://webdiplomacy.net/) either
 
 ### Installation
 
-Most of the code of the project implemented in Python with some parts in C++. The snippet below show how to install and build all required components within a conda environment on Ubuntu system. You would need C++ comp 
+Most of the code of the project implemented in Python with some parts in C++. The snippet below show how to install and build all required components within a conda environment on Ubuntu system. You would need C++ compilter with C++11 support. We use gcc 9.4.
 
 ```
 # Clone the repo with submodules:
