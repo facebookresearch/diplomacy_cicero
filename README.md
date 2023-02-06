@@ -30,6 +30,9 @@ To get the game's spirit, watch [some](https://www.youtube.com/c/diplostrats) [g
 You can play the game online on [webDiplomacy](https://webdiplomacy.net/) either against bots or humans.
 
 ### Installation
+
+Most of the code of the project implemented in Python with some parts in C++. The snippet below show how to install and build all required components within a conda environment on Ubuntu system. You would need C++ compiler with C++11 support. We use gcc 9.4.
+
 ```
 # Clone the repo with submodules:
 git clone --recursive git@github.com:facebookresearch/diplomacy_cicero.git diplomacy_cicero
