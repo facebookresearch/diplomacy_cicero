@@ -74,6 +74,7 @@ from parlai_diplomacy.wrappers.factory import (
 )
 from parlai_diplomacy.wrappers.dialogue import BaseDialogueWrapper
 from parlai_diplomacy.wrappers.orders import ParlAIAllOrderIndependentRolloutWrapper
+import copy
 
 MAX_ATTEMPTS_GEN_VALID = 5
 
@@ -340,6 +341,7 @@ class ParlaiMessageHandler:
 
         self.binarize_sleep_times_in_5m_games = cfg.binarize_sleep_times_in_5m_games
         self.limit_consecutive_outbound_messages = cfg.limit_consecutive_outbound_messages
+        # self.deception = cfg.deception if cfg.deception
 
     def expects_pseudo_orders(self) -> bool:
         """Does any module expect pseudo orders?"""
@@ -603,6 +605,7 @@ class ParlaiMessageHandler:
     def _update_pseudo_orders(
         self, game: Game, power: Power, recipient: Power, pseudo_orders: Optional[PseudoOrders],
     ) -> Optional[PseudoOrders]:
+
         if self.model_dialogue.expects_pseudo_orders():
             if pseudo_orders is None:
                 pseudo_orders = self.get_pseudo_orders_many_powers(
@@ -620,10 +623,19 @@ class ParlaiMessageHandler:
 
             logging.info(f"Pseudo orders for {power}: {pseudo_orders}")
             meta_annotations.add_pseudo_orders_next_msg(pseudo_orders)
-            self.model_dialogue.update_pseudo_orders(
-                game.current_short_phase, power, pseudo_orders
-            )
-
+            # if self.deception:
+            if power == 'RUSSIA' and game.current_short_phase[-1]=='M':
+                self.update_deceive_orders(game, power, pseudo_orders)
+                deceive_orders = self.get_deceive_orders()
+                self.model_dialogue.update_pseudo_orders(
+                    game.current_short_phase, power, deceive_orders
+                )
+                logging.info(f"Deceive Pseudo orders for {power}: {deceive_orders}")
+            else:
+                self.model_dialogue.update_pseudo_orders(
+                    game.current_short_phase, power, pseudo_orders
+                )
+            
             if (
                 self.message_filterer.ensemble_nonsense_classifier
                 and self.message_filterer.ensemble_nonsense_classifier.expects_pseudo_orders()
@@ -898,6 +910,25 @@ class ParlaiMessageHandler:
 
         return maybe_msg_dict
 
+    def update_deceive_orders(self, game: Game, power: Power, pseudo_orders: PseudoOrders):
+        self.deceive_orders = copy.deepcopy(pseudo_orders)
+        possible_orders = get_all_possible_orders_by_power(game)[power]
+        unit_order = dict() 
+        for order in possible_orders:
+            l_order = order.split()
+            logging.info(f"order split for {order}: {l_order}")
+            unit = l_order[0] + ' ' + l_order[1]
+            if unit not in unit_order:
+                unit_order[unit] = []
+            unit_order[unit].append(order)
+        logging.info(f"Possible orders for {power}: {unit_order}")
+        deceive_orders = []
+        for unit, orders in unit_order.items():
+            deceive_orders.append(random.choice(orders))
+        self.deceive_orders.val[game.current_short_phase][power] = tuple((deceive_orders))
+
+    def get_deceive_orders(self) -> PseudoOrders:
+        return self.deceive_orders
 
 def apply_needs_response_sleep_heuristic(
     game: Game, power: Power, sleep_times: SleepTimes
@@ -1120,3 +1151,4 @@ def joint_action_contains_xpower_support_or_convoy(
             if is_friendly_xpower_support_or_convoy(game, order, power):
                 return True
     return False
+
