@@ -1,9 +1,9 @@
 # Diplomacy Cicero and Diplodocus
 
-This code contains checkpoints and training code the following papers:
+This code contains checkpoints and training code for the following papers:
 
 * ["Human-Level Play in the Game of Diplomacy by Combining Language Models with Strategic Reasoning"](https://www.science.org/doi/10.1126/science.ade9097) published in Science, November 2022.
-* ["Mastering the Game of No-Press Diplomacy via Human-Regularized Reinforcement Learning and Planning"](https://arxiv.org/abs/2210.05492) in review at ICLR 2023.
+* ["Mastering the Game of No-Press Diplomacy via Human-Regularized Reinforcement Learning and Planning"](https://arxiv.org/abs/2210.05492) accepted to ICLR 2023.
 
 ### Code
 A very brief orientation:
