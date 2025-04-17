@@ -79,7 +79,7 @@ After each pull it's recommended to run `make` to re-compile internal C++ and pr
 
 ### Downloading model files
 
-Please email <diplomacyteam@meta.com> to request the password. Then run `bash bin/download_model_files.sh <PASSWORD>`. This will download and decrypt all relevant model files into `./models`. This might take awhile. Please note the model files have their own license separate from the code in this repository. More details on this [can be found below](#license-for-model-weights).
+The password for the model files is the following: `dbEmG*yo@fuWzb79cx_pN7.TRm4cqk`. Run `bash bin/download_model_files.sh <PASSWORD>`. This will download and decrypt all relevant model files into `./models`. This might take awhile. Please note the model files have their own license (CC-by-NC 4.0) separate from the code in this repository. More details on this [can be found below](#license-for-model-weights).
 
 ### Accessing Cicero's experiment games
 
